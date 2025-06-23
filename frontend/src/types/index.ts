@@ -26,6 +26,12 @@ export interface Hospital {
   location: string;
   type: 'public' | 'private' | 'Public' | 'Private';
   icus?: number;
+  latitude: number;
+  longitude: number;
+  specialties?: string[];
+  isOpen?: boolean;
+  description?: string;
+  image?: string;
 }
 
 export interface Doctor {
@@ -77,6 +83,17 @@ export interface Appointment {
 }
 
 export interface SearchFilters {
+  location?: string;
+  type?: string;
+  min_rating?: number;
+  query?: string;
+  doctor_name?: string;
+  department_name?: string;
+  test_name?: string;
+  sort_by?: string;
+}
+
+export interface HospitalFilter{
   location?: string;
   type?: string;
   min_rating?: number;

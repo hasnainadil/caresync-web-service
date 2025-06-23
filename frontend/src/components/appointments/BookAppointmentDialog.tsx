@@ -10,7 +10,7 @@ import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Doctor, Hospital } from '@/types';
-import { apiClient } from '@/lib/api';
+import { apiClient } from '@/lib/api_dummy';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 

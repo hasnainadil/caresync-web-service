@@ -385,16 +385,12 @@ class ApiClient {
   }
 
   async registerUser(data: UserRegistration) {
-    console.log("registerUser");
-    console.log(data); console.log("Making request to /user/v1/test");
-    const response = await this.request(
-      "auth-service",
-      "/user/v1/register",
-      {
-        method: "POST",
-        data: {
+    try {
+      console.log("registerUser");
+      const response = await axios.post(
+        `${API_BASE_URL["auth-service"]}/user/v1/register`,
+        {
           "userId": data.userId,
-          "accessToken": data.accessToken,
           "name": data.name,
           "email": data.email,
           "password": data.password,
@@ -405,12 +401,25 @@ class ApiClient {
             "po": data.location.po,
             "city": data.location.city,
             "postalCode": data.location.postalCode,
-            "zoneId": data.location.zoneId
+            "zoneId": data.location.zoneId,
+          },
+          // "accessToken": data.accessToken
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${data.accessToken}`
           }
         }
-      })
-    console.log("Response from /user/v1/test:");
-    console.log(response.data);
+      )
+      console.log("Response from /user/v1/test:");
+      console.log(response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error in registerUser:");
+      console.error(error);
+      throw error;
+    }
 
   }
 

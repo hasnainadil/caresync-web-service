@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { apiClient } from '@/lib/api';
+import { apiClient } from '@/lib/api_dummy';
 import { Link } from 'react-router-dom';
 import { MoveLeft } from 'lucide-react';
 import { deleteUser } from 'firebase/auth';

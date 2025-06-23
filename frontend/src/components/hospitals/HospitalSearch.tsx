@@ -29,7 +29,7 @@ const HospitalSearch: React.FC<HospitalSearchProps> = ({ onSearch, isLoading }) 
   };
 
   return (
-    <Card className="mb-8">
+    <Card className="mb-8 shadow-md rounded-2xl">
       <CardContent className="p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -113,7 +113,7 @@ const HospitalSearch: React.FC<HospitalSearchProps> = ({ onSearch, isLoading }) 
             </div>
           </div>
 
-          <Button type="submit" className="w-full md:w-auto" disabled={isLoading}>
+          <Button type="submit" className="w-full md:w-auto active:scale-95" disabled={isLoading}>
             <Search className="mr-2 h-4 w-4" />
             {isLoading ? 'Searching...' : 'Search Hospitals'}
           </Button>

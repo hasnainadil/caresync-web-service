@@ -1,43 +1,71 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
-import { apiClient } from '@/lib/api';
+import { apiClient } from '@/lib/api_dummy';
 import { Hospital, User, TestTube, Building2 } from 'lucide-react';
-import { Hospital as HospitalType, Doctor, Department, DiagnosticTest } from '@/types';
+import { Hospital as HospitalType, Doctor, Department, DiagnosticTest, Rating } from '@/types';
+import Layout from "@/components/Layout";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import AddDepartmentDialog from '@/components/admin/AddDepartmentDialog';
+import AddTestDialog from '@/components/admin/AddTestDialog';
+import EditTestDialog from '@/components/admin/EditTestDialog';
 
 const AdminDashboardPage: React.FC = () => {
+  const { hospitalId: hospitalIdFromUrl } = useParams<{ hospitalId: string }>();
+  // For now, we'll default to hospital '1' if no ID is in the URL.
+  const hospitalId = hospitalIdFromUrl || '1';
+  
   const [hospital, setHospital] = useState<HospitalType | null>(null);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [tests, setTests] = useState<DiagnosticTest[]>([]);
+  const [ratings, setRatings] = useState<Rating[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     loadHospitalData();
-  }, []);
+  }, [hospitalId]);
 
   const loadHospitalData = async () => {
+    if (!hospitalId) {
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     try {
-      // In a real app, you would get the hospital ID from the admin's session
-      const hospitalId = '1'; // Placeholder
-      const [hospitalRes, doctorsRes, departmentsRes, testsRes] = await Promise.all([
+      const [
+        hospitalRes,
+        doctorsRes,
+        departmentsRes,
+        testsRes,
+        ratingsRes,
+      ] = await Promise.all([
         apiClient.getHospital(hospitalId),
         apiClient.getHospitalDoctors(hospitalId),
         apiClient.getHospitalDepartments(hospitalId),
         apiClient.getHospitalTests(hospitalId),
+        apiClient.getHospitalRatings(hospitalId),
       ]);
 
       setHospital(hospitalRes.data);
       setDoctors(doctorsRes.data || []);
       setDepartments(departmentsRes.data || []);
       setTests(testsRes.data || []);
+      setRatings(ratingsRes.data || []);
     } catch (error) {
       toast({
         title: "Error",
@@ -45,7 +73,9 @@ const AdminDashboardPage: React.FC = () => {
         variant: "destructive",
       });
       // If unauthorized, redirect to admin login
-      navigate('/admin/login');
+      if (error.response?.status === 401) {
+        navigate('/admin/login');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -69,44 +99,6 @@ const AdminDashboardPage: React.FC = () => {
       });
     }
   };
-
-  // const handleAddDoctor = async (data: { doctor_id: number }) => {
-  //   if (!hospital) return;
-
-  //   try {
-  //     await apiClient.addDoctorToHospital(hospital.id.toString(), data);
-  //     toast({
-  //       title: "Success",
-  //       description: "Doctor added successfully.",
-  //     });
-  //     loadHospitalData();
-  //   } catch (error) {
-  //     toast({
-  //       title: "Error",
-  //       description: "Failed to add doctor.",
-  //       variant: "destructive",
-  //     });
-  //   }
-  // };
-
-  // const handleAddTest = async (data: { test_id: number; cost: number }) => {
-  //   if (!hospital) return;
-
-  //   try {
-  //     await apiClient.addTestToHospital(hospital.id.toString(), data);
-  //     toast({
-  //       title: "Success",
-  //       description: "Test added successfully.",
-  //     });
-  //     loadHospitalData();
-  //   } catch (error) {
-  //     toast({
-  //       title: "Error",
-  //       description: "Failed to add test.",
-  //       variant: "destructive",
-  //     });
-  //   }
-  // };
 
   const handleAddDepartment = async (data: { department_id: number }) => {
     if (!hospital) return;
@@ -133,23 +125,38 @@ const AdminDashboardPage: React.FC = () => {
     }
   };
 
-  if (isLoading || !hospital) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 p-8">
-        <div className="text-center">Loading...</div>
-      </div>
+      <Layout>
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 p-8 flex items-center justify-center">
+          <div className="text-center">Loading...</div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!hospital) {
+    return (
+      <Layout>
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 p-8 flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold text-red-600">Could not load hospital data.</h2>
+            <p className="text-gray-600 mt-2">
+              Please ensure you are logged in with a valid administrator account.
+            </p>
+            <Button onClick={() => navigate('/admin/login')} className="mt-4">
+              Go to Admin Login
+            </Button>
+          </div>
+        </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Hospital Admin Dashboard</h1>
-          <Button variant="outline" onClick={() => navigate('/admin/login')}>
-            Logout
-          </Button>
-        </div>
+    <Layout>
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
 
         <Tabs defaultValue="hospital" className="space-y-8">
           <TabsList>
@@ -194,98 +201,149 @@ const AdminDashboardPage: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="doctors">
-            <div className="grid gap-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Add New Doctor</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Button onClick={() => navigate('/admin/doctors/new')}>
-                    Add Doctor
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {doctors.map((doctor) => (
-                <Card key={doctor.id}>
-                  <CardHeader>
-                    <CardTitle>{doctor.name}</CardTitle>
-                    <CardDescription>{doctor.specialty}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <div>Email: {doctor.email}</div>
-                      <div>Phone: {doctor.phone_number}</div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Doctors</CardTitle>
+                  <CardDescription>
+                    Manage the doctors at your hospital.
+                  </CardDescription>
+                </div>
+                <Button onClick={() => navigate(`/admin/dashboard/${hospitalId}/add-doctor`)}>
+                  Add Doctor
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Specialty</TableHead>
+                      <TableHead>Contact</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {doctors.map((doc) => (
+                      <TableRow key={doc.id}>
+                        <TableCell>{doc.name}</TableCell>
+                        <TableCell>{doc.specialty}</TableCell>
+                        <TableCell>{doc.phone_number}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="departments">
-            <div className="grid gap-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Add New Department</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Button onClick={() => navigate('/admin/departments/new')}>
-                    Add Department
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {departments.map((department) => (
-                <Card key={department.id}>
-                  <CardHeader>
-                    <CardTitle>{department.name}</CardTitle>
-                    <CardDescription>{department.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <div>Head Doctor: {department.head_doctor_name}</div>
-                      <div>Contact: {department.contact_number}</div>
-                      <div>Beds: {department.beds}</div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Departments</CardTitle>
+                  <CardDescription>
+                    Manage your hospital's departments.
+                  </CardDescription>
+                </div>
+                <AddDepartmentDialog hospitalId={hospitalId!} onDepartmentAdded={loadHospitalData} />
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Head Doctor</TableHead>
+                      <TableHead>Beds</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {departments.map((dept) => (
+                      <TableRow key={dept.id}>
+                        <TableCell>{dept.name}</TableCell>
+                        <TableCell>{dept.head_doctor_name}</TableCell>
+                        <TableCell>{dept.beds}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="tests">
-            <div className="grid gap-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Add New Test</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Button onClick={() => navigate('/admin/tests/new')}>
-                    Add Test
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {tests.map((test) => (
-                <Card key={test.id}>
-                  <CardHeader>
-                    <CardTitle>{test.name}</CardTitle>
-                    <CardDescription>{test.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <div>Cost: ৳{test.cost}</div>
-                      <div>Status: {test.availability}</div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Diagnostic Tests</CardTitle>
+                  <CardDescription>
+                    Manage the tests available at your hospital.
+                  </CardDescription>
+                </div>
+                <AddTestDialog hospitalId={hospitalId!} onTestAdded={loadHospitalData} />
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Cost</TableHead>
+                      <TableHead>Availability</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {tests.map((test) => (
+                      <TableRow key={test.id}>
+                        <TableCell>{test.name}</TableCell>
+                        <TableCell>${test.cost}</TableCell>
+                        <TableCell>{test.availability}</TableCell>
+                        <TableCell className="text-right">
+                          <EditTestDialog
+                            hospitalId={hospitalId!}
+                            test={test}
+                            onTestUpdated={loadHospitalData}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Ratings and Reviews Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Ratings and Reviews</CardTitle>
+            <CardDescription>
+              View patient feedback and ratings.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>User</TableHead>
+                  <TableHead>Rating</TableHead>
+                  <TableHead>Review</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {ratings.map((rating) => (
+                  <TableRow key={rating.id}>
+                    <TableCell>{rating.user_name}</TableCell>
+                    <TableCell>{rating.rating}/5</TableCell>
+                    <TableCell>{rating.review_text}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       </div>
-    </div>
+    </Layout>
   );
 };
 

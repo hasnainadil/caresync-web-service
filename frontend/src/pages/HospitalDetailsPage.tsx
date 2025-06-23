@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Hospital, Doctor, Department, DiagnosticTest, Rating } from '@/types';
-import { apiClient } from '@/lib/api';
+import { apiClient } from '@/lib/api_dummy';
 import { toast } from '@/hooks/use-toast';
 import { MapPin, Phone, Star, Globe, User, Calendar } from 'lucide-react';
 import RatingForm from '@/components/ratings/RatingForm';
@@ -105,7 +105,7 @@ const HospitalDetailsPage: React.FC = () => {
     <Layout>
       <div className="space-y-8">
         {/* Hospital Header */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex justify-between items-start mb-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">{hospital.name}</h1>
@@ -138,15 +138,15 @@ const HospitalDetailsPage: React.FC = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-            <div className="text-center p-4 bg-blue-50 rounded-lg">
+            <div className="text-center p-4 bg-blue-50 rounded-lg shadow-inner">
               <div className="text-2xl font-bold text-blue-600">{hospital.icus || 0}</div>
               <div className="text-sm text-gray-600">ICU Beds</div>
             </div>
-            <div className="text-center p-4 bg-green-50 rounded-lg">
+            <div className="text-center p-4 bg-green-50 rounded-lg shadow-inner">
               <div className="text-2xl font-bold text-green-600">{doctors.length}</div>
               <div className="text-sm text-gray-600">Doctors</div>
             </div>
-            <div className="text-center p-4 bg-purple-50 rounded-lg">
+            <div className="text-center p-4 bg-purple-50 rounded-lg shadow-inner">
               <div className="text-2xl font-bold text-purple-600">{departments.length}</div>
               <div className="text-sm text-gray-600">Departments</div>
             </div>
@@ -155,7 +155,7 @@ const HospitalDetailsPage: React.FC = () => {
 
         {/* Tabs for different sections */}
         <Tabs defaultValue="doctors" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-4  shadow-md active:shadow-inner">
             <TabsTrigger value="doctors">Doctors</TabsTrigger>
             <TabsTrigger value="departments">Departments</TabsTrigger>
             <TabsTrigger value="tests">Tests</TabsTrigger>
@@ -264,7 +264,7 @@ const HospitalDetailsPage: React.FC = () => {
                         <div className="text-sm text-gray-500">
                           {new Date(rating.created_at).toLocaleDateString()}
                         </div>
-                        {user && rating.user_id === user.id && (
+                        {user && rating.user_id === user.uid && (
                           <RatingForm
                             hospitalId={hospital.id}
                             onRatingAdded={handleRatingAdded}

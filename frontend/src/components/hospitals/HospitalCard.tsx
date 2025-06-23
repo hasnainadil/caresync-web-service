@@ -3,11 +3,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { HospitalLocation } from '@/types';
+import { Hospital } from '@/types';
 import { MapPin, Building2, Hash } from 'lucide-react';
 
 interface HospitalCardProps {
-  hospital: HospitalLocation;
+  hospital: Hospital;
 }
 
 const HospitalCard: React.FC<HospitalCardProps> = ({ hospital }) => {
@@ -18,7 +18,7 @@ const HospitalCard: React.FC<HospitalCardProps> = ({ hospital }) => {
           <div className="flex justify-between items-start">
             <CardTitle className="text-lg">Hospital #{hospital.id}</CardTitle>
             <Badge variant="outline" className="w-fit">
-              {hospital.locationType}
+              {hospital.type}
             </Badge>
           </div>
         </CardHeader>
@@ -29,7 +29,7 @@ const HospitalCard: React.FC<HospitalCardProps> = ({ hospital }) => {
               <div className="text-sm">
                 <div>{hospital.address}</div>
                 <div className="text-gray-500">
-                  {hospital.thana}, {hospital.po}, {hospital.city}
+                  {hospital.location}
                 </div>
               </div>
             </div>
@@ -37,11 +37,11 @@ const HospitalCard: React.FC<HospitalCardProps> = ({ hospital }) => {
             <div className="flex items-center justify-between text-sm text-gray-600">
               <div className="flex items-center">
                 <Building2 className="h-4 w-4 mr-1" />
-                <span>Postal: {hospital.postalCode}</span>
+                <span>Postal: {hospital.phone_number}</span>
               </div>
               <div className="flex items-center">
                 <Hash className="h-4 w-4 mr-1" />
-                <span>Zone: {hospital.zoneId}</span>
+                <span>Zone: {hospital.rating}</span>
               </div>
             </div>
           </div>

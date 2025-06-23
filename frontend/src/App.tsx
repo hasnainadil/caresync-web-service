@@ -13,6 +13,8 @@ import RegisterForm from "./components/auth/RegisterForm";
 import VerifyOtpForm from "./components/auth/VerifyOtpForm";
 import LoginForm from "./components/auth/LoginForm";
 import NotFound from "./pages/NotFound";
+import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
+import AddDoctorPage from "./pages/admin/AddDoctorPage";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +34,9 @@ const App = () => (
             <Route path="/verify-otp" element={<VerifyOtpForm />} />
             <Route path="/login" element={<LoginForm />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="/admin/dashboard/:hospitalId" element={<AdminDashboardPage />} />
+            <Route path="/admin/dashboard/:hospitalId/add-doctor" element={<AddDoctorPage />} />
+            <Route path="/admin" element={<AdminDashboardPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

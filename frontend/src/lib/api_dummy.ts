@@ -1,47 +1,8 @@
-import { Appointment, Rating, Hospital, Doctor, Department, DiagnosticTest } from '@/types';
+import { Appointment, Rating, Hospital, Doctor, Department, DiagnosticTest, HospitalFilter } from '@/types';
+import { UserRegistration } from './api';
+import { mockHospitals, mockDoctors } from './data';
 
-// Mock data
-const mockHospitals: Hospital[] = [
-  {
-    id: 1,
-    name: "City General Hospital",
-    address: "123 Healthcare Ave",
-    phone_number: "555-0123",
-    website: "www.citygeneral.com",
-    location: "Downtown",
-    type: "public",
-    icus: 15,
-    rating: 4.5
-  },
-  {
-    id: 2,
-    name: "Private Care Center",
-    address: "456 Medical Drive",
-    phone_number: "555-0456",
-    website: "www.privatecare.com",
-    location: "Uptown",
-    type: "private",
-    icus: 10,
-    rating: 4.8
-  }
-];
-
-const mockDoctors: Doctor[] = [
-  {
-    id: 1,
-    name: "Dr. John Smith",
-    specialty: "Cardiology",
-    phone_number: "555-1111",
-    email: "john.smith@hospital.com"
-  },
-  {
-    id: 2,
-    name: "Dr. Sarah Johnson",
-    specialty: "Neurology",
-    phone_number: "555-2222",
-    email: "sarah.johnson@hospital.com"
-  }
-];
+const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
 const mockDepartments: Department[] = [
   {
@@ -150,7 +111,8 @@ class DummyApiClient {
     };
   }
 
-  async searchHospitals(filters: any) {
+  async searchHospitals(filters: HospitalFilter) {
+    await delay(1500);
     return {
       success: true,
       data: mockHospitals
@@ -303,20 +265,18 @@ class DummyApiClient {
   }
 
   async requestNewTest(hospitalId: string, data: any) {
-    return {
-      success: true,
-      message: "New test request submitted successfully"
-    };
+    console.log("Requesting new test for hospital:", hospitalId, data);
+    return { success: true, message: "Request for new test submitted." };
   }
 
   async updateTest(hospitalId: string, testId: string, data: any) {
-    return {
-      success: true,
-      message: "Test updated successfully"
-    };
+    await delay(1000);
+    console.log("Updating test:", testId, "for hospital:", hospitalId, "with data:", data);
+    return { success: true, message: "Test updated successfully." };
   }
 
   async addDepartmentToHospital(hospitalId: string, data: any) {
+    await delay(1000);
     return {
       success: true,
       message: "Department added successfully"
@@ -330,6 +290,22 @@ class DummyApiClient {
     };
   }
 
+  async registerUser(data: UserRegistration) {
+    await delay(1000);
+    return {
+      success: true,
+      message: "User registered successfully"
+    };
+  }
+
+  async getAllHospitals() {
+    await delay(2000);
+    return {
+      success: true,
+      data: mockHospitals
+    };
+  }
+
   async updateDepartmentHead(hospitalId: string, departmentId: string, data: any) {
     return {
       success: true,
@@ -338,4 +314,4 @@ class DummyApiClient {
   }
 }
 
-export const dummyApiClient = new DummyApiClient(); 
+export const apiClient = new DummyApiClient(); 
