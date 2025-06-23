@@ -34,60 +34,28 @@ const HospitalInfoSidebar: React.FC<HospitalInfoSidebarProps> = ({ hospital, onC
         </CardHeader>
         <ScrollArea className="flex-grow">
           <CardContent className="p-4 space-y-4">
-            {hospital.image && (
-              <img
-                src={hospital.image}
-                alt={hospital.name}
-                className="w-full h-40 object-cover rounded-lg"
-              />
-            )}
-            <div>
-              <p className="text-sm text-gray-600">{hospital.address}</p>
+            <div className="flex gap-1 flex-wrap">
+              {hospital.types.map((type) => (
+                <Badge key={type} variant="secondary">
+                  {type}
+                </Badge>
+              ))}
             </div>
             <div className="flex items-center gap-2">
               <div className="flex items-center">
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
-                    className={`w-5 h-5 ${
-                      i < Math.floor(hospital.rating)
-                        ? 'text-yellow-400 fill-current'
-                        : 'text-gray-300'
-                    }`}
+                    className={`w-5 h-5 text-gray-300`}
                   />
                 ))}
               </div>
-              <span className="text-md font-semibold text-gray-800">{hospital.rating.toFixed(1)}</span>
-              <span className="text-sm text-gray-500">(based on reviews)</span>
+              {/* No rating in new format, so just show types */}
             </div>
-            <div className="flex items-center gap-3 text-sm text-gray-600">
-              <Clock className="w-4 h-4" />
-              <span className={hospital.isOpen ? "font-semibold text-green-600" : "font-semibold text-red-600"}>
-                {hospital.isOpen ? 'Open Now' : 'Closed'}
-              </span>
-            </div>
-            {hospital.specialties && hospital.specialties.length > 0 && (
-              <div>
-                <h4 className="font-semibold mb-2">Specialties</h4>
-                <div className="flex flex-wrap gap-2">
-                  {hospital.specialties.map((specialty, index) => (
-                    <Badge key={index} variant="secondary">
-                      {specialty}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-            {hospital.description && (
-                <div>
-                    <h4 className="font-semibold mb-2">About</h4>
-                    <p className="text-sm text-gray-600">{hospital.description}</p>
-                </div>
-            )}
             <div className="space-y-2 pt-2">
                 <div className="flex items-center gap-3 text-sm">
                     <Phone className="w-4 h-4 text-gray-500" />
-                    <span>{hospital.phone_number}</span>
+                    <span>{hospital.phoneNumber}</span>
                 </div>
                 {hospital.website && (
                     <div className="flex items-center gap-3 text-sm">
@@ -97,6 +65,12 @@ const HospitalInfoSidebar: React.FC<HospitalInfoSidebarProps> = ({ hospital, onC
                         </a>
                     </div>
                 )}
+                <div className="flex items-center gap-3 text-sm">
+                  <span>Cost: {hospital.costRange}</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm">
+                  <span>Lat: {hospital.latitude}, Lng: {hospital.longitude}</span>
+                </div>
             </div>
           </CardContent>
         </ScrollArea>

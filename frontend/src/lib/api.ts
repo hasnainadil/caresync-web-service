@@ -1,11 +1,6 @@
-const API_BASE_URL = {
-  "location-service": "http://location-service:8083",
-  "auth-service": "http://auth-service:8081",
-  "data-service": "http://data-service:8082",
-};
-
 import { Appointment, Rating } from "@/types";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
+import { API_BASE_URL, API_URLS } from "./api-urls";
 
 interface ApiResponse<T = any> {
   success: boolean;
@@ -105,11 +100,11 @@ class ApiClient {
     this.token = localStorage.getItem("auth_token");
   }
   private async request(
-    serviceName: keyof typeof API_BASE_URL,
+    serviceName: keyof typeof API_URLS,
     endpoint: string,
     options: AxiosRequestConfig = {}
   ): Promise<AxiosResponse<any, any>> {
-    const baseUrl = API_BASE_URL[serviceName];
+    const baseUrl = API_URLS[serviceName as keyof typeof API_URLS];
     const url = `${baseUrl}${endpoint}`;
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -392,7 +387,7 @@ class ApiClient {
     try {
       console.log("registerUser");
       const response = await axios.post(
-        `${API_BASE_URL["auth-service"]}/user/v1/register`,
+        API_URLS.auth_service.registerUser,
         {
           userId: data.userId,
           name: data.name,
@@ -426,10 +421,15 @@ class ApiClient {
     }
   }
 
-  async getAllHospitals() {
-    return this.request("location-service", "/location/v1/hospitals", {
-      method: "GET",
-    });
+  async getAllHospitals(): Promise<Hospital[]> {
+    const response = await axios.get(API_URLS.data_service.getAllHospitals);
+    console.log(response);
+    return response.data;
+  }
+
+  async getHospitalById(id: string): Promise<Hospital> {
+    const response = await axios.get(API_URLS.data_service.getHospitalById(id));
+    return response.data;
   }
 }
 

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,33 +15,30 @@ const HospitalCard: React.FC<HospitalCardProps> = ({ hospital }) => {
       <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
         <CardHeader>
           <div className="flex justify-between items-start">
-            <CardTitle className="text-lg">Hospital #{hospital.id}</CardTitle>
-            <Badge variant="outline" className="w-fit">
-              {hospital.type}
-            </Badge>
+            <CardTitle className="text-lg">{hospital.name}</CardTitle>
+            <div className="flex gap-1 flex-wrap">
+              {hospital.types.map((type) => (
+                <Badge key={type} variant="outline" className="w-fit">
+                  {type}
+                </Badge>
+              ))}
+            </div>
           </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            <div className="flex items-start text-gray-600">
-              <MapPin className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
-              <div className="text-sm">
-                <div>{hospital.address}</div>
-                <div className="text-gray-500">
-                  {hospital.location}
-                </div>
-              </div>
-            </div>
-            
             <div className="flex items-center justify-between text-sm text-gray-600">
               <div className="flex items-center">
                 <Building2 className="h-4 w-4 mr-1" />
-                <span>Postal: {hospital.phone_number}</span>
+                <span>Phone: {hospital.phoneNumber}</span>
               </div>
               <div className="flex items-center">
                 <Hash className="h-4 w-4 mr-1" />
-                <span>Zone: {hospital.rating}</span>
+                <span>ICUs: {hospital.icus}</span>
               </div>
+            </div>
+            <div className="flex items-center text-sm text-gray-600">
+              <span>Cost: {hospital.costRange}</span>
             </div>
           </div>
         </CardContent>

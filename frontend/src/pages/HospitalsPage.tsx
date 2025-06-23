@@ -4,7 +4,7 @@ import HospitalSearch from "@/components/hospitals/HospitalSearch";
 import HospitalCard from "@/components/hospitals/HospitalCard";
 import HospitalMap from "@/components/hospitals/HospitalMap";
 import { Hospital, SearchFilters } from "@/types";
-import { apiClient } from "@/lib/api_dummy";
+import { apiClient } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 import { Grid, Map } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -27,9 +27,9 @@ const HospitalsPage: React.FC = () => {
     const fetchDemoHospitals = async () => {
       setIsLoading(true);
       try {
-        const response = await apiClient.getAllHospitals();
-        console.log(response);
-        setHospitals(response.data);
+        const allHospitals = await apiClient.getAllHospitals();
+        console.log(allHospitals);
+        setHospitals(allHospitals as unknown as Hospital[]);
       } finally {
         setIsLoading(false);
       }

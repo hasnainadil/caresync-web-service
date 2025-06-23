@@ -19,19 +19,14 @@ export interface HospitalLocation {
 export interface Hospital {
   id: number;
   name: string;
-  address: string;
-  phone_number: string;
-  rating: number;
+  phoneNumber: string;
   website?: string;
-  location: string;
-  type: 'public' | 'private' | 'Public' | 'Private';
-  icus?: number;
+  types: string[];
+  icus: number;
+  costRange: string;
   latitude: number;
   longitude: number;
-  specialties?: string[];
-  isOpen?: boolean;
-  description?: string;
-  image?: string;
+  locationResponse?: any;
 }
 
 export interface Doctor {

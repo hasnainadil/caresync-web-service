@@ -138,18 +138,17 @@ const LocationMarker: React.FC<LocationMarkerProps> = ({ position, hospitals, on
         <Marker
           key={hospital.id}
           position={[hospital.latitude, hospital.longitude]}
-          icon={createCustomIcon(hospital.rating >= 4 ? '#10b981' : hospital.rating >= 3 ? '#f59e0b' : '#ef4444')}
+          icon={createCustomIcon('#10b981')}
           eventHandlers={{
             click: () => onHospitalClick(hospital),
           }}
         >
-          {'distance' in hospital && (
-            <Tooltip sticky>
-              <div className="text-sm font-semibold">
-                {formatDistance((hospital as any).distance)} away
-              </div>
-            </Tooltip>
-          )}
+          <Tooltip sticky>
+            <div className="text-sm font-semibold">
+              {hospital.types.join(', ')}<br/>
+              Cost: {hospital.costRange}
+            </div>
+          </Tooltip>
         </Marker>
       ))}
     </>
