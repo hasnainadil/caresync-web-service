@@ -1,8 +1,8 @@
 const API_BASE_URL = {
-  "location-service": "http://localhost:8083",
-  "auth-service": "http://localhost:8081",
-  "data-service": "http://localhost:8082",
-}
+  "location-service": "http://location-service:8083",
+  "auth-service": "http://auth-service:8081",
+  "data-service": "http://data-service:8082",
+};
 
 import { Appointment, Rating } from "@/types";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
@@ -125,10 +125,10 @@ class ApiClient {
     const response = await axios(url, {
       ...options,
       headers: headers,
-    })
+    });
 
     console.log("Response status:", response.status);
-    return response
+    return response;
   }
 
   setToken(token: string) {
@@ -146,25 +146,17 @@ class ApiClient {
     password: string;
     location: string;
   }) {
-    return this.request(
-      "auth-service",
-      "/auth/register",
-      {
-        method: "POST",
-        data: JSON.stringify(data),
-      }
-    );
+    return this.request("auth-service", "/auth/register", {
+      method: "POST",
+      data: JSON.stringify(data),
+    });
   }
 
   async verifyOtp(data: { email: string; otp: string }) {
-    return this.request(
-      "auth-service",
-      "/auth/verify-otp",
-      {
-        method: "POST",
-        data: JSON.stringify(data),
-      }
-    );
+    return this.request("auth-service", "/auth/verify-otp", {
+      method: "POST",
+      data: JSON.stringify(data),
+    });
   }
 
   async login(data: { email: string; password: string }) {
@@ -272,10 +264,14 @@ class ApiClient {
       appointment_fee: number;
     }
   ) {
-    return this.request("data-service", `/hospital-admin/hospitals/${hospitalId}/doctors`, {
-      method: "POST",
-      data: JSON.stringify(data),
-    });
+    return this.request(
+      "data-service",
+      `/hospital-admin/hospitals/${hospitalId}/doctors`,
+      {
+        method: "POST",
+        data: JSON.stringify(data),
+      }
+    );
   }
 
   async requestNewDoctor(
@@ -305,10 +301,14 @@ class ApiClient {
       availability: string;
     }
   ) {
-    return this.request("data-service", `/hospital-admin/hospitals/${hospitalId}/tests`, {
-      method: "POST",
-      data: JSON.stringify(data),
-    });
+    return this.request(
+      "data-service",
+      `/hospital-admin/hospitals/${hospitalId}/tests`,
+      {
+        method: "POST",
+        data: JSON.stringify(data),
+      }
+    );
   }
 
   async requestNewTest(
@@ -349,10 +349,14 @@ class ApiClient {
       available_days: string[];
     }
   ) {
-    return this.request("data-service", `/hospital-admin/hospitals/${hospitalId}/departments`, {
-      method: "POST",
-      data: JSON.stringify(data),
-    });
+    return this.request(
+      "data-service",
+      `/hospital-admin/hospitals/${hospitalId}/departments`,
+      {
+        method: "POST",
+        data: JSON.stringify(data),
+      }
+    );
   }
 
   async requestNewDepartment(
@@ -390,28 +394,28 @@ class ApiClient {
       const response = await axios.post(
         `${API_BASE_URL["auth-service"]}/user/v1/register`,
         {
-          "userId": data.userId,
-          "name": data.name,
-          "email": data.email,
-          "password": data.password,
-          "location": {
-            "locationType": "USER",
-            "address": data.location.address,
-            "thana": data.location.thana,
-            "po": data.location.po,
-            "city": data.location.city,
-            "postalCode": data.location.postalCode,
-            "zoneId": data.location.zoneId,
+          userId: data.userId,
+          name: data.name,
+          email: data.email,
+          password: data.password,
+          location: {
+            locationType: "USER",
+            address: data.location.address,
+            thana: data.location.thana,
+            po: data.location.po,
+            city: data.location.city,
+            postalCode: data.location.postalCode,
+            zoneId: data.location.zoneId,
           },
           // "accessToken": data.accessToken
         },
         {
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${data.accessToken}`
-          }
+            Authorization: `Bearer ${data.accessToken}`,
+          },
         }
-      )
+      );
       console.log("Response from /user/v1/test:");
       console.log(response.data);
       return response.data;
@@ -420,15 +424,12 @@ class ApiClient {
       console.error(error);
       throw error;
     }
-
   }
 
   async getAllHospitals() {
-    return this.request("location-service", "/location/v1/hospitals",
-      {
-        method: "GET",
-      }
-    );
+    return this.request("location-service", "/location/v1/hospitals", {
+      method: "GET",
+    });
   }
 }
 
