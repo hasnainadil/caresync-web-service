@@ -152,7 +152,7 @@ const HospitalsPage: React.FC = () => {
                 ))}
               </div>
             ) : (
-              <HospitalMap hospitals={hospitals} className="mt-6 h-[500px] flex flex-1 flex-row" />
+              <HospitalMap hospitals={hospitals} className="mt-6" />
             )}
 
             {hospitals.length === 0 && !isLoading && (

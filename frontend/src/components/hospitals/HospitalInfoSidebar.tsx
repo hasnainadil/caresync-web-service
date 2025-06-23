@@ -24,7 +24,7 @@ const HospitalInfoSidebar: React.FC<HospitalInfoSidebarProps> = ({ hospital, onC
   };
 
   return (
-    <div className="top-0 right-0 h-full w-96 bg-white shadow-lg z-[1001] flex flex-col transform transition-transform duration-300 ease-in-out">
+    <div className="h-full w-96 bg-white shadow-lg flex flex-col transform transition-transform duration-300 ease-in-out">
       <Card className="h-full flex flex-col border-none shadow-none rounded-none">
         <CardHeader className="flex flex-row items-start justify-between p-4 border-b">
           <CardTitle className="text-xl font-bold leading-snug">{hospital.name}</CardTitle>

@@ -402,7 +402,7 @@ class ApiClient {
             postalCode: data.location.postalCode,
             zoneId: data.location.zoneId,
           },
-          // "accessToken": data.accessToken
+          accessToken: data.accessToken
         },
         {
           headers: {

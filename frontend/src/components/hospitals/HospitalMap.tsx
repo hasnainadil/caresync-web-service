@@ -145,7 +145,7 @@ const LocationMarker: React.FC<LocationMarkerProps> = ({ position, hospitals, on
         >
           <Tooltip sticky>
             <div className="text-sm font-semibold">
-              {hospital.types.join(', ')}<br/>
+              {hospital.types.join(', ')}<br />
               Cost: {hospital.costRange}
             </div>
           </Tooltip>
@@ -174,11 +174,11 @@ const HospitalMap: React.FC<HospitalMapProps> = ({ hospitals, className = '' }) 
     const R = 6371; // Radius of the Earth in kilometers
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   };
 
@@ -188,17 +188,17 @@ const HospitalMap: React.FC<HospitalMapProps> = ({ hospitals, className = '' }) 
       const hospitalsWithDistance = hospitals.map(hospital => ({
         ...hospital,
         distance: calculateDistance(
-          userLocation[0], 
-          userLocation[1], 
-          hospital.latitude, 
+          userLocation[0],
+          userLocation[1],
+          hospital.latitude,
           hospital.longitude
         )
       }));
-      
-      const sorted = hospitalsWithDistance.sort((a, b) => 
+
+      const sorted = hospitalsWithDistance.sort((a, b) =>
         (a.distance || 0) - (b.distance || 0)
       );
-      
+
       setSortedHospitals(sorted);
     } else {
       setSortedHospitals(hospitals);
@@ -264,6 +264,9 @@ const HospitalMap: React.FC<HospitalMapProps> = ({ hospitals, className = '' }) 
     return `${distance.toFixed(1)}km`;
   };
 
+  // Determine dynamic height for mobile view
+  const mobileHeight = selectedHospital ? 'h-[1100px]' : 'h-[700px]';
+
   if (!userLocation) {
     return (
       <div className={`flex items-center justify-center h-96 bg-gray-100 rounded-lg ${className}`}>
@@ -279,65 +282,67 @@ const HospitalMap: React.FC<HospitalMapProps> = ({ hospitals, className = '' }) 
   }
 
   return (
-    <div className={`relative ${className}`}>
-      {/* Map Controls */}
-      <div className="absolute top-4 right-4 z-[1000] space-y-2">
-        <Button
-          size="sm"
-          variant="secondary"
-          onClick={handleCenterOnUser}
-          className="shadow-lg"
+    <div className={` w-full rounded-lg flex flex-col md:flex-row flex-1 ${mobileHeight} md:h-[600px] ${className}`}>
+      <div className='relative flex flex-col h-full w-full'>
+        {/* Map Controls */}
+        <div className="absolute top-4 right-4 z-[1000] space-y-2">
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={handleCenterOnUser}
+            className="shadow-lg"
+          >
+            <MapPin className="w-4 h-4 mr-2" />
+            My Location
+          </Button>
+        </div>
+
+        {/* Map Stats */}
+        <div className="absolute top-4 left-11 z-[1000]">
+          <Card className="shadow-lg">
+            <CardContent className="p-3">
+              <div className="text-sm">
+                <p className="font-semibold">{sortedHospitals.length} hospitals nearby</p>
+                <p className="text-gray-600">Sorted by distance</p>
+                {sortedHospitals.length > 0 && 'distance' in sortedHospitals[0] && (
+                  <p className="text-xs text-blue-600">
+                    Nearest: {formatDistance((sortedHospitals[0] as any).distance)}
+                  </p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <MapContainer
+          ref={mapRef}
+          center={userLocation}
+          zoom={13}
+          className="h-[700px] md:h-[600px] w-full rounded-lg"
+          zoomControl={true}
+          scrollWheelZoom={true}
+          doubleClickZoom={true}
+          boxZoom={true}
+          keyboard={true}
+          dragging={true}
+          touchZoom={true}
         >
-          <MapPin className="w-4 h-4 mr-2" />
-          My Location
-        </Button>
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+
+          <MapResizeHandler />
+
+          <LocationMarker
+            position={userLocation}
+            hospitals={sortedHospitals}
+            onHospitalClick={handleHospitalClick}
+          />
+
+          {route && <RoutingMachine start={route.start} end={route.end} />}
+        </MapContainer>
       </div>
-
-      {/* Map Stats */}
-      <div className="absolute top-4 left-4 z-[1000]">
-        <Card className="shadow-lg">
-          <CardContent className="p-3">
-            <div className="text-sm">
-              <p className="font-semibold">{sortedHospitals.length} hospitals nearby</p>
-              <p className="text-gray-600">Sorted by distance</p>
-              {sortedHospitals.length > 0 && 'distance' in sortedHospitals[0] && (
-                <p className="text-xs text-blue-600">
-                  Nearest: {formatDistance((sortedHospitals[0] as any).distance)}
-                </p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <MapContainer
-        ref={mapRef}
-        center={userLocation}
-        zoom={13}
-        className="h-[600px] w-full rounded-lg"
-        zoomControl={true}
-        scrollWheelZoom={true}
-        doubleClickZoom={true}
-        boxZoom={true}
-        keyboard={true}
-        dragging={true}
-        touchZoom={true}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        
-        <MapResizeHandler />
-
-        <LocationMarker
-          position={userLocation}
-          hospitals={sortedHospitals}
-          onHospitalClick={handleHospitalClick}
-        />
-
-        {route && <RoutingMachine start={route.start} end={route.end} />}
-      </MapContainer>
       <HospitalInfoSidebar hospital={selectedHospital} onClose={handleCloseSidebar} />
     </div>
   );
