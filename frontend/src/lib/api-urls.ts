@@ -5,22 +5,29 @@ const API_BASE_URL = {
 };
 
 // const API_BASE_URL = {
-//     "location-service": "http://location-service:8083",
-//     "auth-service": "http://auth-service:8081",
-//     "data-service": "http://data-service:8082",
+//     "location-service": "http://localhost:8083",
+//     "auth-service": "http://localhost:8081",
+//     "data-service": "http://localhost:8082",
 // };
 
-const API_URLS = {
-    location_service: {
-        // getAllHospitals: `${API_BASE_URL["location-service"]}/ho`,
-    },
-    data_service: {
-        getAllHospitals: `${API_BASE_URL["data-service"]}/hospital/v1/all`,
-        getHospitalById: (id: string) => `${API_BASE_URL["data-service"]}/hospital/v1/id/${id}`,
-    },
-    auth_service: {
-        registerUser: `${API_BASE_URL["auth-service"]}/user/v1/register`,
-    }
-}
+  const API_BASE_URL = {
+    "location-service": "http://location-service:8083",
+    "auth-service": "http://auth-service:8081",
+    "data-service": "http://data-service:8082",
+  };
 
-export { API_BASE_URL, API_URLS }
+const API_URLS = {
+  location_service: {
+    // getAllHospitals: `${API_BASE_URL["location-service"]}/ho`,
+  },
+  data_service: {
+    getAllHospitals: `${API_BASE_URL["data-service"]}/hospital/v1/all`,
+    getHospitalById: (id: string) =>
+      `${API_BASE_URL["data-service"]}/hospital/v1/id/${id}`,
+  },
+  auth_service: {
+    registerUser: `${API_BASE_URL["auth-service"]}/user/v1/register`,
+  },
+};
+
+export { API_BASE_URL, API_URLS };
