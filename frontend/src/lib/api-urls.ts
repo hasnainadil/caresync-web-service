@@ -1,20 +1,20 @@
 const API_BASE_URL = {
-    "location-service": "http://localhost:8083",
-    "auth-service": "http://localhost:8081",
-    "data-service": "http://localhost:8082",
+  "location-service": "http://localhost:8083",
+  "auth-service": "http://localhost:8081",
+  "data-service": "http://localhost:8082",
 };
 
 // const API_BASE_URL = {
-//     "location-service": "http://localhost:8083",
-//     "auth-service": "http://localhost:8081",
-//     "data-service": "http://localhost:8082",
+//   "location-service": "http://services.caresync.district12.xyz:8083",
+//   "auth-service": "http://services.caresync.district12.xyz:8081",
+//   "data-service": "http://services.caresync.district12.xyz:8082",
 // };
 
-  const API_BASE_URL = {
-    "location-service": "http://location-service:8083",
-    "auth-service": "http://auth-service:8081",
-    "data-service": "http://data-service:8082",
-  };
+// const API_BASE_URL = {
+//   "location-service": "http://location-service:8083",
+//   "auth-service": "http://auth-service:8081",
+//   "data-service": "http://data-service:8082",
+// };
 
 const API_URLS = {
   location_service: {
