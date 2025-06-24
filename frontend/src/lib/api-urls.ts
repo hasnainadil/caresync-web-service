@@ -5,9 +5,9 @@
 // };
 
 const API_BASE_URL = {
-  "location-service": "http://services.caresync.district12.xyz:8083",
-  "auth-service": "http://services.caresync.district12.xyz:8081",
-  "data-service": "http://services.caresync.district12.xyz:8082",
+  "location-service": "http://services.caresync.district12.xyz/location",
+  "auth-service": "http://services.caresync.district12.xyz/auth",
+  "data-service": "http://services.caresync.district12.xyz/data",
 };
 
 // const API_BASE_URL = {
