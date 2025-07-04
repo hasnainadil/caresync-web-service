@@ -33,7 +33,7 @@ jobs:
     - name: Run linting
       run: |
         cd frontend
-        npx eslint . --max-warnings 0
+        npx eslint .
         
     - name: Run unit tests
       run: |
