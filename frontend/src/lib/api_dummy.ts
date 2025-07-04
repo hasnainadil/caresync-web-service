@@ -1,6 +1,6 @@
-import { Appointment, Rating, Hospital, Doctor, Department, DiagnosticTest, HospitalFilter } from '@/types';
-import { UserRegistration } from './api';
-import { mockHospitals, mockDoctors } from './data';
+import { Appointment, Rating, Hospital, Doctor, Department, DiagnosticTest, HospitalSearchCriteria, HOSPITAL_TYPE, COST_RANGE, LocationResponse } from '@/types';
+import { UserRegistration, HospitalListItem } from './api';
+import { mockDoctors, mockHospitals } from './data';
 
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
@@ -111,16 +111,44 @@ class DummyApiClient {
     };
   }
 
-  async searchHospitals(filters: HospitalFilter) {
+  async searchHospitals(filters: HospitalSearchCriteria): Promise<{ success: boolean; data: Hospital[] }> {
     await delay(1500);
+    
+    let filteredHospitals = [...mockHospitals];
+    
+    // Filter by cost range
+    if (filters.costRange) {
+      filteredHospitals = filteredHospitals.filter(hospital => 
+        hospital.costRange === COST_RANGE[filters.costRange as keyof typeof COST_RANGE]
+      );
+    }
+    
+    // Filter by zone
+    if (filters.zoneId) {
+      filteredHospitals = filteredHospitals.filter(hospital => 
+        hospital.locationResponse?.zoneId === filters.zoneId
+      );
+    }
+    
+    // Filter by types
+    if (filters.types && filters.types.length > 0) {
+      filteredHospitals = filteredHospitals.filter(hospital => 
+        filters.types!.some(type => hospital.types.includes(type))
+      );
+    }
+    
     return {
       success: true,
-      data: mockHospitals
+      data: filteredHospitals
     };
   }
 
   async getHospital(id: string) {
     const hospital = mockHospitals.find(h => h.id === parseInt(id));
+    if (!hospital) return {
+      success: true,
+      data: mockHospitals[0]
+    }
     return {
       success: true,
       data: hospital
@@ -236,11 +264,12 @@ class DummyApiClient {
     };
   }
 
-  async updateHospital(id: string, data: Partial<Hospital>) {
+  async updateHospital(data: any): Promise<Hospital> {
+    await delay(1000);
     return {
       success: true,
-      message: "Hospital updated successfully"
-    };
+      data: data
+    } as any;
   }
 
   async addDoctorToHospital(hospitalId: string, data: any) {
@@ -298,20 +327,222 @@ class DummyApiClient {
     };
   }
 
-  async getAllHospitals() {
-    await delay(2000);
-    return {
-      success: true,
-      data: mockHospitals
-    };
-  }
-
   async updateDepartmentHead(hospitalId: string, departmentId: string, data: any) {
     return {
       success: true,
       message: "Department head updated successfully"
     };
   }
+
+  // Methods to match api.ts interface
+  async testAuthEndpoint(): Promise<any> {
+    await delay(500);
+    return {
+      success: true,
+      message: "Test endpoint working"
+    };
+  }
+
+  async userLoggedIn(userId: string) {
+    await delay(500);
+    return {
+      success: true,
+      message: "User logged in successfully"
+    };
+  }
+
+  async getUserById(userId: string) {
+    await delay(500);
+    return {
+      success: true,
+      data: {
+        id: userId,
+        name: "John Doe",
+        email: "john.doe@email.com",
+        locationResponse: {
+          id: 1,
+          locationType: "USER" as const,
+          address: "123 User Street",
+          thana: "Dhanmondi",
+          po: "Dhanmondi",
+          city: "Dhaka",
+          postalCode: 1205,
+          zoneId: 1
+        }
+      }
+    };
+  }
+
+  async updateUser(data: any) {
+    await delay(500);
+    return {
+      success: true,
+      data: {
+        id: "user123",
+        name: data.name || "Updated User",
+        email: data.email || "updated@email.com",
+        locationResponse: {
+          id: 1,
+          locationType: "USER" as const,
+          address: data.address || "Updated Address",
+          thana: "Updated Thana",
+          po: "Updated PO",
+          city: "Updated City",
+          postalCode: 1234,
+          zoneId: 1
+        }
+      }
+    };
+  }
+
+  async deleteUserById(userId: string): Promise<void> {
+    await delay(500);
+    console.log(`User ${userId} deleted`);
+  }
+
+  async getAllHospitals(): Promise<Hospital[]> {
+    await delay(2000);
+    return mockHospitals;
+  }
+
+  async getHospitalById(id: string): Promise<Hospital> {
+    await delay(1000);
+    const hospital = mockHospitals.find(h => h.id === parseInt(id));
+    if (!hospital) {
+      return mockHospitals[0];
+    }
+    return hospital;
+  }
+
+  async searchHospitalsByCriteria(criteria: HospitalSearchCriteria): Promise<HospitalListItem[]> {
+    await delay(1500);
+    
+    let filteredHospitals = [...mockHospitals];
+    
+    // Filter by cost range
+    if (criteria.costRange) {
+      filteredHospitals = filteredHospitals.filter(hospital => 
+        hospital.costRange === COST_RANGE[criteria.costRange as keyof typeof COST_RANGE]
+      );
+    }
+    
+    // Filter by zone
+    if (criteria.zoneId) {
+      filteredHospitals = filteredHospitals.filter(hospital => 
+        hospital.locationResponse?.zoneId === criteria.zoneId
+      );
+    }
+    
+    // Filter by types
+    if (criteria.types && criteria.types.length > 0) {
+      filteredHospitals = filteredHospitals.filter(hospital => 
+        criteria.types!.some(type => hospital.types.includes(type))
+      );
+    }
+
+    // Convert to HospitalListItem format
+    return filteredHospitals.map(hospital => ({
+      id: hospital.id,
+      name: hospital.name,
+      phoneNumber: hospital.phoneNumber,
+      website: hospital.website,
+      types: hospital.types.map(type => type.toString()),
+      icus: hospital.icus,
+      location: hospital.locationResponse ? `${hospital.locationResponse.city}, ${hospital.locationResponse.thana}` : null
+    }));
+  }
+
+  async registerHospital(data: any): Promise<Hospital> {
+    await delay(1000);
+    return {
+      id: Math.floor(Math.random() * 1000) + 100,
+      ...data
+    } as Hospital;
+  }
+
+  async deleteHospitalById(id: string): Promise<void> {
+    await delay(500);
+    console.log(`Hospital ${id} deleted`);
+  }
+
+  // Location service methods
+  async getAllLocations(): Promise<LocationResponse[]> {
+    await delay(1000);
+    return mockHospitals.map(hospital => hospital.locationResponse!).filter(Boolean);
+  }
+
+  async getAllHospitalLocations(): Promise<LocationResponse[]> {
+    await delay(1000);
+    return mockHospitals.map(hospital => hospital.locationResponse!).filter(Boolean);
+  }
+
+  async getAllUserLocations(): Promise<LocationResponse[]> {
+    await delay(1000);
+    return [
+      {
+        id: 100,
+        locationType: "USER",
+        address: "123 User Street",
+        thana: "Dhanmondi",
+        po: "Dhanmondi",
+        city: "Dhaka",
+        postalCode: 1205,
+        zoneId: 1
+      }
+    ];
+  }
+
+  async getAllDoctorLocations(): Promise<LocationResponse[]> {
+    await delay(1000);
+    return [
+      {
+        id: 200,
+        locationType: "DOCTOR",
+        address: "456 Doctor Ave",
+        thana: "Gulshan",
+        po: "Gulshan",
+        city: "Dhaka",
+        postalCode: 1212,
+        zoneId: 1
+      }
+    ];
+  }
+
+  async getLocationById(id: string): Promise<LocationResponse> {
+    await delay(500);
+    const location = mockHospitals.find(h => h.locationResponse?.id === parseInt(id))?.locationResponse;
+    if (location) {
+      return location;
+    }
+    return {
+      id: parseInt(id),
+      locationType: "HOSPITAL",
+      address: "Default Address",
+      thana: "Default Thana",
+      po: "Default PO",
+      city: "Default City",
+      postalCode: 1000,
+      zoneId: 1
+    };
+  }
+
+  async saveNewLocation(location: LocationResponse): Promise<LocationResponse> {
+    await delay(500);
+    return {
+      ...location,
+      id: Math.floor(Math.random() * 1000) + 1
+    };
+  }
+
+  async updateLocation(location: LocationResponse): Promise<LocationResponse> {
+    await delay(500);
+    return location;
+  }
+
+  async deleteLocationById(id: string): Promise<void> {
+    await delay(500);
+    console.log(`Location ${id} deleted`);
+  }
 }
 
-export const apiClient = new DummyApiClient(); 
+export const apiClient = new DummyApiClient();

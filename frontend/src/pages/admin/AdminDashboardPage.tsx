@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api_dummy';
 import { Hospital, User, TestTube, Building2 } from 'lucide-react';
-import { Hospital as HospitalType, Doctor, Department, DiagnosticTest, Rating } from '@/types';
+import { Hospital as HospitalType, Doctor, DiagnosticTest, Rating } from '@/types';
 import Layout from "@/components/Layout";
 import {
   Table,
@@ -21,15 +21,16 @@ import {
 import AddDepartmentDialog from '@/components/admin/AddDepartmentDialog';
 import AddTestDialog from '@/components/admin/AddTestDialog';
 import EditTestDialog from '@/components/admin/EditTestDialog';
+import AddHospitalSection from '@/components/admin/AddHospital';
 
 const AdminDashboardPage: React.FC = () => {
   const { hospitalId: hospitalIdFromUrl } = useParams<{ hospitalId: string }>();
   // For now, we'll default to hospital '1' if no ID is in the URL.
   const hospitalId = hospitalIdFromUrl || '1';
-  
+
   const [hospital, setHospital] = useState<HospitalType | null>(null);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
-  const [departments, setDepartments] = useState<Department[]>([]);
+  const [departments, setDepartments] = useState([]);
   const [tests, setTests] = useState<DiagnosticTest[]>([]);
   const [ratings, setRatings] = useState<Rating[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -50,20 +51,17 @@ const AdminDashboardPage: React.FC = () => {
       const [
         hospitalRes,
         doctorsRes,
-        departmentsRes,
         testsRes,
         ratingsRes,
       ] = await Promise.all([
         apiClient.getHospital(hospitalId),
         apiClient.getHospitalDoctors(hospitalId),
-        apiClient.getHospitalDepartments(hospitalId),
         apiClient.getHospitalTests(hospitalId),
         apiClient.getHospitalRatings(hospitalId),
       ]);
 
       setHospital(hospitalRes.data);
       setDoctors(doctorsRes.data || []);
-      setDepartments(departmentsRes.data || []);
       setTests(testsRes.data || []);
       setRatings(ratingsRes.data || []);
     } catch (error) {
@@ -83,9 +81,8 @@ const AdminDashboardPage: React.FC = () => {
 
   const handleUpdateHospital = async (data: Partial<HospitalType>) => {
     if (!hospital) return;
-
     try {
-      await apiClient.updateHospital(hospital.id.toString(), data);
+      await apiClient.updateHospital({ ...hospital, ...data });
       toast({
         title: "Success",
         description: "Hospital information updated successfully.",
@@ -156,7 +153,7 @@ const AdminDashboardPage: React.FC = () => {
   return (
     <Layout>
       <div className="space-y-6">
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+
 
         <Tabs defaultValue="hospital" className="space-y-8">
           <TabsList>
@@ -164,6 +161,7 @@ const AdminDashboardPage: React.FC = () => {
             <TabsTrigger value="doctors">Doctors</TabsTrigger>
             <TabsTrigger value="departments">Departments</TabsTrigger>
             <TabsTrigger value="tests">Tests</TabsTrigger>
+            <TabsTrigger value="addHospital">Add Hospital</TabsTrigger>
           </TabsList>
 
           <TabsContent value="hospital">
@@ -182,17 +180,10 @@ const AdminDashboardPage: React.FC = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Address</Label>
-                    <Input
-                      defaultValue={hospital.address}
-                      onChange={(e) => handleUpdateHospital({ address: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
                     <Label>Phone Number</Label>
                     <Input
-                      defaultValue={hospital.phone_number}
-                      onChange={(e) => handleUpdateHospital({ phone_number: e.target.value })}
+                      defaultValue={hospital.phoneNumber}
+                      onChange={(e) => handleUpdateHospital({ phoneNumber: e.target.value })}
                     />
                   </div>
                 </form>
@@ -310,6 +301,10 @@ const AdminDashboardPage: React.FC = () => {
                 </Table>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="addHospital">
+            <AddHospitalSection onHospitalAdded={loadHospitalData} />
           </TabsContent>
         </Tabs>
 

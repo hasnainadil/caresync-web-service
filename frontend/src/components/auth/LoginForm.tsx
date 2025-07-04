@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { dummyApiClient as apiClient } from "@/lib/api_dummy";
+import { apiClient } from "@/lib/api";
 
 const LoginForm: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -29,6 +29,7 @@ const LoginForm: React.FC = () => {
 
     try {
       const result = await login(formData.email, formData.password);
+      const response = await apiClient.userLoggedIn(result.user.uid)
       if (result.user) {
         toast({
           title: "Login successful!",

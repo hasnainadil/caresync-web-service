@@ -1,6 +1,7 @@
-import { Appointment, Rating } from "@/types";
+import { Appointment, Rating, HOSPITAL_TYPE, COST_RANGE, LocationResponse, Hospital, HospitalSearchCriteria, UserRegistration, UserResponse, UpdateUserRequest, HospitalListItem, HospitalRegistrationRequest } from "@/types";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { API_BASE_URL, API_URLS } from "./api-urls";
+import { auth } from "@/lib/firebase";
 
 interface ApiResponse<T = any> {
   success: boolean;
@@ -12,380 +13,32 @@ interface ApiResponse<T = any> {
     message: string;
   };
 }
-export interface UserRegistration {
-  userId: string;
-  accessToken: string;
-  name: string;
-  email: string;
-  password: string;
-  location: {
-    locationType: "USER";
-    address: string;
-    thana: string;
-    po: string;
-    city: string;
-    postalCode: number;
-    zoneId: number;
-  };
-}
-// {
-//   "userId": "user-3",
-//   "accessToken": "accessToken",
-//   "name": "John Doe",
-//   "email": "hasn@gmail.com",
-//   "password": "john@123",
-//   "location": {
-//     "locationType": "USER",
-//     "address": "new address",
-//     "thana": "kg",
-//     "po": "kg",
-//     "city": "Sylhet",
-//     "postalCode": 1009,
-//     "zoneId": 9
-//   }
-// }
-
-interface Hospital {
-  id: number;
-  name: string;
-  address: string;
-  phone_number: string;
-  website?: string;
-  location: string;
-  type: "public" | "private";
-  icus: number;
-  rating: number;
-}
-
-interface Doctor {
-  id: number;
-  name: string;
-  specialty: string;
-  phone_number: string;
-  email: string;
-}
-
-interface Department {
-  id: number;
-  name: string;
-  description: string;
-  head_doctor_name: string;
-  contact_number: string;
-  beds: number;
-  available_days: string[];
-}
-
-interface DiagnosticTest {
-  id: number;
-  name: string;
-  description: string;
-  cost: number;
-  availability: string;
-}
-
-interface HospitalListItem {
-  id: number;
-  name: string;
-  phoneNumber: string;
-  website?: string;
-  types: string[];
-  icus: number;
-  location: string | null;
-}
 
 class ApiClient {
-  private token: string | null = null;
-
-  constructor() {
-    this.token = localStorage.getItem("auth_token");
-  }
-  private async request(
-    serviceName: keyof typeof API_URLS,
-    endpoint: string,
-    options: AxiosRequestConfig = {}
-  ): Promise<AxiosResponse<any, any>> {
-    const baseUrl = API_URLS[serviceName as keyof typeof API_URLS];
-    const url = `${baseUrl}${endpoint}`;
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      ...(options.headers as Record<string, string>),
-    };
-
-    if (this.token) {
-      headers.Authorization = `Bearer ${this.token}`;
-    }
-    console.log("Making request to:", url);
-    console.log(options);
-    console.log("Headers:", headers);
-    const response = await axios(url, {
-      ...options,
-      headers: headers,
-    });
-
-    console.log("Response status:", response.status);
-    return response;
-  }
-
   setToken(token: string) {
-    this.token = token;
     localStorage.setItem("auth_token", token);
   }
 
-  clearToken() {
-    this.token = null;
-    localStorage.removeItem("auth_token");
-  }
-  async register(data: {
-    name: string;
-    email: string;
-    password: string;
-    location: string;
-  }) {
-    return this.request("auth-service", "/auth/register", {
-      method: "POST",
-      data: JSON.stringify(data),
-    });
-  }
-
-  async verifyOtp(data: { email: string; otp: string }) {
-    return this.request("auth-service", "/auth/verify-otp", {
-      method: "POST",
-      data: JSON.stringify(data),
-    });
-  }
-
-  async login(data: { email: string; password: string }) {
-    return this.request("auth-service", "/auth/login", {
-      method: "POST",
-      data: JSON.stringify(data),
-    });
-  }
-  async searchHospitals(filters: any) {
-    const params = new URLSearchParams(filters).toString();
-    return this.request("data-service", `/hospitals?${params}`);
-  }
-
-  async getHospital(id: string) {
-    return this.request("data-service", `/hospitals/${id}`);
-  }
-
-  async getHospitalDoctors(id: string) {
-    return this.request("data-service", `/hospitals/${id}/doctors`);
-  }
-
-  async getHospitalDepartments(id: string) {
-    return this.request("data-service", `/hospitals/${id}/departments`);
-  }
-
-  async getHospitalTests(id: string) {
-    return this.request("data-service", `/hospitals/${id}/tests`);
-  }
-
-  async getHospitalRatings(id: string) {
-    return this.request("data-service", `/hospitals/${id}/ratings`);
-  }
-  async addHospitalRating(
-    id: string,
-    data: { rating: number; review_text: string }
-  ) {
-    return this.request("data-service", `/hospitals/${id}/ratings`, {
-      method: "POST",
-      data: JSON.stringify(data),
-    });
-  }
-
-  async updateRating(
-    id: string,
-    data: { rating: number; review_text: string }
-  ) {
-    return this.request("data-service", `/ratings/${id}`, {
-      method: "PUT",
-      data: JSON.stringify(data),
-    });
-  }
-
-  async deleteRating(id: string) {
-    return this.request("data-service", `/ratings/${id}`, {
-      method: "DELETE",
-    });
-  }
-  async getDoctor(id: string) {
-    return this.request("data-service", `/doctors/${id}`);
-  }
-
-  async getDoctorHospitals(id: string) {
-    return this.request("data-service", `/doctors/${id}/hospitals`);
-  }
-
-  async getAppointments() {
-    return this.request("data-service", "/appointments");
-  }
-
-  async bookAppointment(data: {
-    doctor_hospital_id: number;
-    appointment_time: string;
-  }) {
-    return this.request("data-service", "/appointments", {
-      method: "POST",
-      data: JSON.stringify(data),
-    });
-  }
-
-  async cancelAppointment(id: string) {
-    return this.request("data-service", `/appointments/${id}`, {
-      method: "DELETE",
-    });
-  }
-  async adminLogin(data: { email: string; password: string }) {
-    return this.request("auth-service", "/hospital-admin/login", {
-      method: "POST",
-      data: JSON.stringify(data),
-    });
-  }
-
-  // Admin API Methods
-  async updateHospital(id: string, data: Partial<Hospital>) {
-    return this.request("data-service", `/hospital-admin/hospitals/${id}`, {
-      method: "PUT",
-      data: JSON.stringify(data),
-    });
-  }
-  async addDoctorToHospital(
-    hospitalId: string,
-    data: {
-      doctor_id: number;
-      appointment_time: string;
-      weekly_schedule: string[];
-      appointment_fee: number;
+  private async getToken(): Promise<string | null> {
+    const user = auth.currentUser;
+    if (user) {
+      return await user.getIdToken();
     }
-  ) {
-    return this.request(
-      "data-service",
-      `/hospital-admin/hospitals/${hospitalId}/doctors`,
-      {
-        method: "POST",
-        data: JSON.stringify(data),
-      }
-    );
+    return null;
   }
 
-  async requestNewDoctor(
-    hospitalId: string,
-    data: {
-      name: string;
-      specialty: string;
-      phone_number: string;
-      email: string;
-      location: string;
-    }
-  ) {
-    return this.request(
-      "data-service",
-      `/hospital-admin/hospitals/${hospitalId}/doctors/request`,
-      {
-        method: "POST",
-        data: JSON.stringify(data),
-      }
-    );
-  }
-  async addTestToHospital(
-    hospitalId: string,
-    data: {
-      test_id: number;
-      cost: number;
-      availability: string;
-    }
-  ) {
-    return this.request(
-      "data-service",
-      `/hospital-admin/hospitals/${hospitalId}/tests`,
-      {
-        method: "POST",
-        data: JSON.stringify(data),
-      }
-    );
-  }
-
-  async requestNewTest(
-    hospitalId: string,
-    data: { name: string; description: string }
-  ) {
-    return this.request(
-      "data-service",
-      `/hospital-admin/hospitals/${hospitalId}/tests/request`,
-      {
-        method: "POST",
-        data: JSON.stringify(data),
-      }
-    );
-  }
-
-  async updateTest(
-    hospitalId: string,
-    testId: string,
-    data: { cost: number; availability: string }
-  ) {
-    return this.request(
-      "data-service",
-      `/hospital-admin/hospitals/${hospitalId}/tests/${testId}`,
-      {
-        method: "PUT",
-        data: JSON.stringify(data),
-      }
-    );
-  }
-  async addDepartmentToHospital(
-    hospitalId: string,
-    data: {
-      department_id: number;
-      head_doctor_id: number;
-      contact_number: string;
-      beds: number;
-      available_days: string[];
-    }
-  ) {
-    return this.request(
-      "data-service",
-      `/hospital-admin/hospitals/${hospitalId}/departments`,
-      {
-        method: "POST",
-        data: JSON.stringify(data),
-      }
-    );
-  }
-
-  async requestNewDepartment(
-    hospitalId: string,
-    data: { name: string; description: string }
-  ) {
-    return this.request(
-      "data-service",
-      `/hospital-admin/hospitals/${hospitalId}/departments/request`,
-      {
-        method: "POST",
-        data: JSON.stringify(data),
-      }
-    );
-  }
-
-  async updateDepartmentHead(
-    hospitalId: string,
-    departmentId: string,
-    data: { head_doctor_id: number }
-  ) {
-    return this.request(
-      "data-service",
-      `/hospital-admin/hospitals/${hospitalId}/departments/${departmentId}/head`,
-      {
-        method: "PUT",
-        data: JSON.stringify(data),
-      }
-    );
+  async testAuthEndpoint(): Promise<any> {
+    const token = await this.getToken();
+    const response = await axios.get(API_URLS.auth_service.testEndpoint, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
   }
 
   async registerUser(data: UserRegistration) {
     try {
-      console.log("registerUser");
       const response = await axios.post(
         API_URLS.auth_service.registerUser,
         {
@@ -411,8 +64,7 @@ class ApiClient {
           },
         }
       );
-      console.log("Response from /user/v1/test:");
-      console.log(response.data);
+      this.setToken(data.accessToken);
       return response.data;
     } catch (error) {
       console.error("Error in registerUser:");
@@ -421,15 +73,246 @@ class ApiClient {
     }
   }
 
+  async userLoggedIn(userId: string) {
+    try {
+      const token = await this.getToken();
+      const response = await axios.post(
+        API_URLS.auth_service.login,
+        {
+          userId: userId,
+          accessToken: token
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error in userLoggedIn:");
+      console.error(error);
+      throw error;
+    }
+  }
+
+  async getUserById(userId: string): Promise<UserResponse> {
+    try {
+      const token = await this.getToken();
+      const response = await axios.get(API_URLS.auth_service.getUserById(userId), {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error in getUserById:");
+      console.error(error);
+      throw error;
+    }
+  }
+
+  async updateUser(data: UpdateUserRequest): Promise<UserResponse> {
+    const token = await this.getToken();
+    const response = await axios.put(API_URLS.auth_service.updateUser, {
+      ...data
+    }, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  }
+
+  async deeleteUserById(userId: string): Promise<void> {
+    const token = await this.getToken();
+    await axios.delete(API_URLS.auth_service.deleteUserById(userId), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }
+
   async getAllHospitals(): Promise<Hospital[]> {
-    const response = await axios.get(API_URLS.data_service.getAllHospitals);
-    console.log(response);
+    const token = await this.getToken();
+    const response = await axios.get(API_URLS.data_service.getAllHospitals, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return response.data;
   }
 
   async getHospitalById(id: string): Promise<Hospital> {
-    const response = await axios.get(API_URLS.data_service.getHospitalById(id));
+    const token = await this.getToken();
+    const response = await axios.get(API_URLS.data_service.getHospitalById(id), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return response.data;
+  }
+
+  async searchHospitalsByCriteria(criteria: HospitalSearchCriteria): Promise<HospitalListItem[]> {
+    try {
+      const token = await this.getToken();
+      const response = await axios.get(
+        API_URLS.data_service.searchHospitalsByCriteria,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: {
+            "costRange": criteria.costRange,
+            "zoneId": criteria.zoneId,
+            "types": criteria.types
+          },
+        }
+      );
+      return response.data;
+
+    } catch (error) {
+      console.error("Error in searchHospitalsByCriteria:");
+      console.error(error);
+      throw error;
+    }
+  }
+
+  async registerHospital(data: HospitalRegistrationRequest): Promise<Hospital> {
+    try {
+      const token = await this.getToken();
+      delete data.id;
+      const location = {
+        locationType: "HOSPITAL" as const,
+        ...data.location
+      };
+      //  Remove the key id from the location
+      delete location.id;
+      const temp = {
+        ...data,
+        location: location
+      }
+      console.log(temp);
+      const response = await axios.post(
+        API_URLS.data_service.registerHospital,
+        {
+          ...data,
+          location: location
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error in registerHospital:");
+      console.error(error);
+      throw error;
+    }
+  }
+
+  async updateHospital(data: HospitalRegistrationRequest): Promise<Hospital> {
+    const token = await this.getToken();
+    const response = await axios.put(
+      API_URLS.data_service.updateHospital,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  }
+
+  async deleteHospitalById(id: string): Promise<void> {
+    const token = await this.getToken();
+    await axios.delete(API_URLS.data_service.deleteHospitalById(id), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }
+
+  async getAllLocations(): Promise<LocationResponse[]> {
+    const token = await this.getToken();
+    const response = await axios.get(API_URLS.location_service.getAllLocations, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  }
+
+  async getAllHospitalLocations(): Promise<LocationResponse[]> {
+    const token = await this.getToken();
+    const response = await axios.get(API_URLS.location_service.getAllHospitalLocations, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  }
+
+  async getAllUserLocations(): Promise<LocationResponse[]> {
+    const token = await this.getToken();
+    const response = await axios.get(API_URLS.location_service.getAllUserLocations, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  }
+
+  async getAllDoctorLocations(): Promise<LocationResponse[]> {
+    const token = await this.getToken();
+    const response = await axios.get(API_URLS.location_service.getAllDoctorLocations, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  }
+
+  async getLocationById(id: string): Promise<LocationResponse> {
+    const token = await this.getToken();
+    const response = await axios.get(API_URLS.location_service.getLocationById(id), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  }
+
+  async saveNewLocation(location: LocationResponse): Promise<LocationResponse> {
+    const token = await this.getToken();
+    const response = await axios.post(API_URLS.location_service.saveNewLocation, location, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  }
+
+  async updateLocation(location: LocationResponse): Promise<LocationResponse> {
+    const token = await this.getToken();
+    const response = await axios.put(API_URLS.location_service.updateLocation, location, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  }
+
+  async deleteLocationById(id: string): Promise<void> {
+    const token = await this.getToken();
+    await axios.delete(API_URLS.location_service.deleteLocationById(id), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
   }
 }
 

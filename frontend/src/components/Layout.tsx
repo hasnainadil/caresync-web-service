@@ -18,7 +18,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50">
+    <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -47,7 +47,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div className="flex items-center space-x-4">
               {isAuthenticated ? (
                 <div className="flex items-center space-x-4">
-                  <span className="text-gray-700">Welcome, {user?.displayName || user?.email}</span>
+                  <Link to="/profile" className="text-gray-700 hover:text-blue-600 transition-colors">Welcome, {user?.displayName || user?.email}</Link>
                   <Button variant="outline" onClick={handleLogout}>
                     Logout
                   </Button>

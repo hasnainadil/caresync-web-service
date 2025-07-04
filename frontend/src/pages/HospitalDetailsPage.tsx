@@ -40,7 +40,8 @@ const HospitalDetailsPage: React.FC = () => {
     try {
       // Load hospital details
       const hospitalResponse = await apiClient.getHospital(id);
-      setHospital(hospitalResponse.data as Hospital);
+      console.log("hospitalResponse", hospitalResponse);
+      setHospital(hospitalResponse.data as unknown as Hospital);
 
       // Load related data
       const [doctorsRes, departmentsRes, testsRes, ratingsRes] = await Promise.all([
@@ -49,6 +50,7 @@ const HospitalDetailsPage: React.FC = () => {
         apiClient.getHospitalTests(id),
         apiClient.getHospitalRatings(id)
       ]);
+      console.log("hospitalResponse", hospitalResponse);
 
       setDoctors((doctorsRes.data as Doctor[]) || []);
       setDepartments((departmentsRes.data as Department[]) || []);
@@ -132,14 +134,14 @@ const HospitalDetailsPage: React.FC = () => {
             </div>
             <div className="text-right">
               <div className="flex gap-1 flex-wrap mb-2">
-                {hospital.types.map((type) => (
+                {hospital?.types?.map((type) => (
                   <Badge key={type} variant="secondary">{type}</Badge>
                 ))}
               </div>
             </div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
             <div className="text-center p-4 bg-blue-50 rounded-lg shadow-inner">
               <div className="text-2xl font-bold text-blue-600">{hospital.icus || 0}</div>
               <div className="text-sm text-gray-600">ICU Beds</div>
@@ -151,6 +153,10 @@ const HospitalDetailsPage: React.FC = () => {
             <div className="text-center p-4 bg-purple-50 rounded-lg shadow-inner">
               <div className="text-2xl font-bold text-purple-600">{departments.length}</div>
               <div className="text-sm text-gray-600">Departments</div>
+            </div>
+            <div className="text-center p-4 bg-orange-50 rounded-lg shadow-inner">
+              <div className="text-2xl font-bold text-orange-600">{tests.length}</div>
+              <div className="text-sm text-gray-600">Tests</div>
             </div>
           </div>
         </div>

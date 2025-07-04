@@ -3,7 +3,7 @@ import Layout from "@/components/Layout";
 import HospitalSearch from "@/components/hospitals/HospitalSearch";
 import HospitalCard from "@/components/hospitals/HospitalCard";
 import HospitalMap from "@/components/hospitals/HospitalMap";
-import { Hospital, SearchFilters } from "@/types";
+import { Hospital, HospitalSearchCriteria } from "@/types";
 import { apiClient } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 import { Grid, Map } from "lucide-react";
@@ -44,15 +44,12 @@ const HospitalsPage: React.FC = () => {
     }
   }, []);
 
-  const handleSearch = async (filters: SearchFilters) => {
+  const handleSearch = async (filters: HospitalSearchCriteria) => {
     setIsLoading(true);
     try {
-      // In a real app, this would call the API
-      const response = await apiClient.searchHospitals(filters);
-      setHospitals(response.data);
-
-      // For now, we'll simulate filtering the mock data
       console.log("Searching with filters:", filters);
+      const response = await apiClient.searchHospitalsByCriteria(filters);
+      setHospitals(response as unknown as Hospital[]);
       toast({
         title: "Search completed",
         description: `Found ${hospitals.length} hospitals`,
