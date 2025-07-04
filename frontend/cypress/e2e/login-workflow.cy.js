@@ -37,9 +37,8 @@ describe('Login Workflow', () => {
     cy.get('input[name=password]').type('cygniV&404');
     cy.get('button[type=submit]').click();
     
-    // Should redirect to dashboard or home (without waiting for API)
-    cy.url().should('not.include', '/login', { timeout: 10000 });
-    cy.contains(/dashboard|logout|profile/i, { timeout: 10000 });
+    // Should redirect to hospitals page (without waiting for API)
+    cy.url().should('include', '/hospitals', { timeout: 10000 });
   });
 
   it('should show error with incorrect credentials', () => {

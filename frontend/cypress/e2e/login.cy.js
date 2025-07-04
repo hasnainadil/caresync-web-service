@@ -42,7 +42,6 @@ describe('Login Workflow', () => {
     cy.get('input[name=email]').type('hasnaenadil@gmail.com');
     cy.get('input[name=password]').type('cygniV&404');
     cy.get('button[type=submit]').click();
-    cy.url().should('not.include', '/login', { timeout: 10000 });
-    cy.contains(/dashboard|logout|profile/i, { timeout: 10000 }); // Adjust to your logged-in indicator
+    cy.url().should('include', '/hospitals', { timeout: 10000 });
   });
 }); 
