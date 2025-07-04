@@ -32,4 +32,20 @@ beforeEach(() => {
   // Mock any unhandled API calls with empty responses
   cy.intercept('GET', '**/api/**', { statusCode: 200, body: [] }).as('apiFallback');
   cy.intercept('POST', '**/api/**', { statusCode: 200, body: { success: true } }).as('apiPostFallback');
+  
+  // Mock Firebase auth calls
+  cy.intercept('POST', '**/identitytoolkit.googleapis.com/**', { 
+    statusCode: 200, 
+    body: { 
+      idToken: 'mock-firebase-token',
+      localId: 'mock-user-id',
+      email: 'test@example.com'
+    } 
+  }).as('firebaseAuth');
+  
+  // Mock any other potential API calls
+  cy.intercept('GET', '**/hospital/**', { statusCode: 200, body: [] }).as('hospitalFallback');
+  cy.intercept('POST', '**/hospital/**', { statusCode: 200, body: { success: true } }).as('hospitalPostFallback');
+  cy.intercept('GET', '**/user/**', { statusCode: 200, body: [] }).as('userFallback');
+  cy.intercept('POST', '**/user/**', { statusCode: 200, body: { success: true } }).as('userPostFallback');
 }); 
