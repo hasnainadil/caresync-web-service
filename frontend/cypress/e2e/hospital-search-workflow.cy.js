@@ -1,6 +1,17 @@
 describe('Hospital Search Workflow', () => {
   beforeEach(() => {
+    // Mock API calls before visiting the page
+    cy.intercept('GET', '**/hospital/v1/all', { fixture: 'hospitals.json' }).as('getAllHospitals');
+    cy.intercept('GET', '**/hospital/v1/search*', { fixture: 'hospitals.json' }).as('searchHospitals');
+    cy.intercept('GET', '**/hospital/v1/id/*', { fixture: 'hospitals.json' }).then((interception) => {
+      const hospitalId = interception.url.split('/').pop();
+      const hospitals = require('../fixtures/hospitals.json');
+      const hospital = hospitals.find(h => h.id === hospitalId);
+      interception.reply({ statusCode: 200, body: hospital || hospitals[0] });
+    }).as('getHospitalById');
+    
     cy.visit('/hospitals');
+    cy.wait('@getAllHospitals');
   });
 
   it('should search hospitals by location', () => {

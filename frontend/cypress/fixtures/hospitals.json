@@ -1,0 +1,77 @@
+[
+  {
+    "id": "1",
+    "name": "Dhaka Medical College Hospital",
+    "type": "PUBLIC",
+    "description": "A leading public hospital in Dhaka",
+    "address": "Dhaka Medical College Road, Dhaka",
+    "phone": "+880-2-9668690",
+    "email": "info@dmch.gov.bd",
+    "website": "https://dmch.gov.bd",
+    "rating": 4.2,
+    "costRange": "LOW",
+    "location": {
+      "id": "loc1",
+      "locationType": "HOSPITAL",
+      "address": "Dhaka Medical College Road",
+      "thana": "Ramna",
+      "po": "Dhaka Medical College",
+      "city": "Dhaka",
+      "postalCode": "1000",
+      "zoneId": "zone1"
+    },
+    "departments": ["Emergency", "Cardiology", "Neurology"],
+    "services": ["Emergency Care", "Surgery", "Diagnostics"],
+    "images": ["https://example.com/dmch1.jpg", "https://example.com/dmch2.jpg"]
+  },
+  {
+    "id": "2",
+    "name": "Square Hospital",
+    "type": "PRIVATE",
+    "description": "Premium private healthcare facility",
+    "address": "18/F, Bir Uttam Qazi Nuruzzaman Sarak, Dhaka",
+    "phone": "+880-2-8144400",
+    "email": "info@squarehospital.com",
+    "website": "https://squarehospital.com",
+    "rating": 4.8,
+    "costRange": "HIGH",
+    "location": {
+      "id": "loc2",
+      "locationType": "HOSPITAL",
+      "address": "18/F, Bir Uttam Qazi Nuruzzaman Sarak",
+      "thana": "Dhanmondi",
+      "po": "Dhanmondi",
+      "city": "Dhaka",
+      "postalCode": "1205",
+      "zoneId": "zone2"
+    },
+    "departments": ["Cardiology", "Oncology", "Orthopedics"],
+    "services": ["Specialized Care", "Surgery", "Diagnostics"],
+    "images": ["https://example.com/square1.jpg", "https://example.com/square2.jpg"]
+  },
+  {
+    "id": "3",
+    "name": "Apollo Hospitals Dhaka",
+    "type": "PRIVATE",
+    "description": "International standard healthcare",
+    "address": "Plot # 81, Block # E, Bashundhara R/A, Dhaka",
+    "phone": "+880-2-8401661",
+    "email": "info@apollodhaka.com",
+    "website": "https://apollodhaka.com",
+    "rating": 4.5,
+    "costRange": "HIGH",
+    "location": {
+      "id": "loc3",
+      "locationType": "HOSPITAL",
+      "address": "Plot # 81, Block # E, Bashundhara R/A",
+      "thana": "Vatara",
+      "po": "Bashundhara",
+      "city": "Dhaka",
+      "postalCode": "1229",
+      "zoneId": "zone3"
+    },
+    "departments": ["Cardiology", "Neurology", "Pediatrics"],
+    "services": ["International Care", "Surgery", "Diagnostics"],
+    "images": ["https://example.com/apollo1.jpg", "https://example.com/apollo2.jpg"]
+  }
+] 
