@@ -1,4 +1,17 @@
-import { Appointment, Rating, HOSPITAL_TYPE, COST_RANGE, LocationResponse, Hospital, HospitalSearchCriteria, UserRegistration, UserResponse, UpdateUserRequest, HospitalListItem, HospitalRegistrationRequest } from "@/types";
+import {
+  Appointment,
+  Rating,
+  HOSPITAL_TYPE,
+  COST_RANGE,
+  LocationResponse,
+  Hospital,
+  HospitalSearchCriteria,
+  UserRegistration,
+  UserResponse,
+  UpdateUserRequest,
+  HospitalListItem,
+  HospitalRegistrationRequest,
+} from "@/types";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { API_BASE_URL, API_URLS } from "./api-urls";
 import { auth } from "@/lib/firebase";
@@ -55,7 +68,7 @@ class ApiClient {
             postalCode: data.location.postalCode,
             zoneId: data.location.zoneId,
           },
-          accessToken: data.accessToken
+          accessToken: data.accessToken,
         },
         {
           headers: {
@@ -80,12 +93,12 @@ class ApiClient {
         API_URLS.auth_service.login,
         {
           userId: userId,
-          accessToken: token
+          accessToken: token,
         },
         {
           headers: {
             Authorization: `Bearer ${token}`,
-          }
+          },
         }
       );
       return response.data;
@@ -99,11 +112,14 @@ class ApiClient {
   async getUserById(userId: string): Promise<UserResponse> {
     try {
       const token = await this.getToken();
-      const response = await axios.get(API_URLS.auth_service.getUserById(userId), {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.get(
+        API_URLS.auth_service.getUserById(userId),
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       return response.data;
     } catch (error) {
       console.error("Error in getUserById:");
@@ -114,13 +130,17 @@ class ApiClient {
 
   async updateUser(data: UpdateUserRequest): Promise<UserResponse> {
     const token = await this.getToken();
-    const response = await axios.put(API_URLS.auth_service.updateUser, {
-      ...data
-    }, {
-      headers: {
-        Authorization: `Bearer ${token}`,
+    const response = await axios.put(
+      API_URLS.auth_service.updateUser,
+      {
+        ...data,
       },
-    });
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return response.data;
   }
 
@@ -134,26 +154,32 @@ class ApiClient {
   }
 
   async getAllHospitals(): Promise<Hospital[]> {
-    const token = await this.getToken();
-    const response = await axios.get(API_URLS.data_service.getAllHospitals, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    // const token = await this.getToken();
+    // const response = await axios.get(API_URLS.data_service.getAllHospitals, {
+    //   headers: {
+    //     Authorization: `Bearer ${token}`,
+    //   },
+    // });
+    const response = await axios.get(API_URLS.data_service.getAllHospitals);
     return response.data;
   }
 
   async getHospitalById(id: string): Promise<Hospital> {
     const token = await this.getToken();
-    const response = await axios.get(API_URLS.data_service.getHospitalById(id), {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await axios.get(
+      API_URLS.data_service.getHospitalById(id),
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return response.data;
   }
 
-  async searchHospitalsByCriteria(criteria: HospitalSearchCriteria): Promise<HospitalListItem[]> {
+  async searchHospitalsByCriteria(
+    criteria: HospitalSearchCriteria
+  ): Promise<HospitalListItem[]> {
     try {
       const token = await this.getToken();
       const response = await axios.get(
@@ -163,14 +189,13 @@ class ApiClient {
             Authorization: `Bearer ${token}`,
           },
           params: {
-            "costRange": criteria.costRange,
-            "zoneId": criteria.zoneId,
-            "types": criteria.types
+            costRange: criteria.costRange,
+            zoneId: criteria.zoneId,
+            types: criteria.types,
           },
         }
       );
       return response.data;
-
     } catch (error) {
       console.error("Error in searchHospitalsByCriteria:");
       console.error(error);
@@ -184,20 +209,20 @@ class ApiClient {
       delete data.id;
       const location = {
         locationType: "HOSPITAL" as const,
-        ...data.location
+        ...data.location,
       };
       //  Remove the key id from the location
       delete location.id;
       const temp = {
         ...data,
-        location: location
-      }
+        location: location,
+      };
       console.log(temp);
       const response = await axios.post(
         API_URLS.data_service.registerHospital,
         {
           ...data,
-          location: location
+          location: location,
         },
         {
           headers: {
@@ -238,71 +263,94 @@ class ApiClient {
 
   async getAllLocations(): Promise<LocationResponse[]> {
     const token = await this.getToken();
-    const response = await axios.get(API_URLS.location_service.getAllLocations, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await axios.get(
+      API_URLS.location_service.getAllLocations,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return response.data;
   }
 
   async getAllHospitalLocations(): Promise<LocationResponse[]> {
     const token = await this.getToken();
-    const response = await axios.get(API_URLS.location_service.getAllHospitalLocations, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await axios.get(
+      API_URLS.location_service.getAllHospitalLocations,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return response.data;
   }
 
   async getAllUserLocations(): Promise<LocationResponse[]> {
     const token = await this.getToken();
-    const response = await axios.get(API_URLS.location_service.getAllUserLocations, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await axios.get(
+      API_URLS.location_service.getAllUserLocations,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return response.data;
   }
 
   async getAllDoctorLocations(): Promise<LocationResponse[]> {
     const token = await this.getToken();
-    const response = await axios.get(API_URLS.location_service.getAllDoctorLocations, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await axios.get(
+      API_URLS.location_service.getAllDoctorLocations,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return response.data;
   }
 
   async getLocationById(id: string): Promise<LocationResponse> {
     const token = await this.getToken();
-    const response = await axios.get(API_URLS.location_service.getLocationById(id), {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await axios.get(
+      API_URLS.location_service.getLocationById(id),
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return response.data;
   }
 
   async saveNewLocation(location: LocationResponse): Promise<LocationResponse> {
     const token = await this.getToken();
-    const response = await axios.post(API_URLS.location_service.saveNewLocation, location, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await axios.post(
+      API_URLS.location_service.saveNewLocation,
+      location,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return response.data;
   }
 
   async updateLocation(location: LocationResponse): Promise<LocationResponse> {
     const token = await this.getToken();
-    const response = await axios.put(API_URLS.location_service.updateLocation, location, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await axios.put(
+      API_URLS.location_service.updateLocation,
+      location,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return response.data;
   }
 
