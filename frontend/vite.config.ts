@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 5173,
-    allowedHosts: "all",
+    allowedHosts: ["services.caresync.district12.xyz"],
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(
     Boolean
