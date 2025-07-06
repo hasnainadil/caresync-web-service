@@ -1,16 +1,16 @@
 import { Search } from "lucide-react";
 
-const API_BASE_URL = {
-  "location-service": "http://localhost:8083",
-  "auth-service": "http://localhost:8081",
-  "data-service": "http://localhost:8082",
-};
-
 // const API_BASE_URL = {
-//   "location-service": "http://services.caresync.district12.xyz:8083",
-//   "auth-service": "http://services.caresync.district12.xyz:8081",
-//   "data-service": "http://services.caresync.district12.xyz:8082",
+//   "location-service": "http://localhost:8083",
+//   "auth-service": "http://localhost:8081",
+//   "data-service": "http://localhost:8082",
 // };
+
+const API_BASE_URL = {
+  "location-service": "http://services.caresync.district12.xyz:8083",
+  "auth-service": "http://services.caresync.district12.xyz:8081",
+  "data-service": "http://services.caresync.district12.xyz:8082",
+};
 
 // const API_BASE_URL = {
 //   "location-service": "http://location-service:8083",
@@ -20,7 +20,7 @@ const API_BASE_URL = {
 
 const API_URLS = {
   location_service: {
-    getAllLocations : `${API_BASE_URL["location-service"]}/location/v1/all`,
+    getAllLocations: `${API_BASE_URL["location-service"]}/location/v1/all`,
     getAllHospitalLocations: `${API_BASE_URL["location-service"]}/location/v1/hospitals`,
     getAllUserLocations: `${API_BASE_URL["location-service"]}/location/v1/users`,
     getAllDoctorLocations: `${API_BASE_URL["location-service"]}/location/v1/doctors`,
