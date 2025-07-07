@@ -69,21 +69,23 @@ const RegisterForm: React.FC = () => {  const [formData, setFormData] = useState
           
           toast({
             title: "Registration failed",
-            description: "Failed to complete registration. Please try again.",
+            description: error.message,
             variant: "destructive",
           });
         }
       } else {
+        console.log(result.error);
         toast({
           title: "Registration failed",
-          description: result.error || "Please try again.",
+          description: result.error ,
           variant: "destructive",
         });
       }
     } catch (error) {
+      console.log(error);
       toast({
         title: "Registration failed",
-        description: "An unexpected error occurred.",
+        description: error.message,
         variant: "destructive",
       });
     } finally {

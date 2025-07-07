@@ -40,6 +40,12 @@ const API_URLS = {
     updateHospital: `${API_BASE_URL["data-service"]}/hospital/v1/update`,
     deleteHospitalById: (id: string) =>
       `${API_BASE_URL["data-service"]}/hospital/v1/delete/${id}`,
+    getHospitalsByZone: (zoneId: number) =>
+      `${API_BASE_URL["data-service"]}/hospital/v1/zone/${zoneId}`,
+    getHospitalsByType: (type: string) =>
+      `${API_BASE_URL["data-service"]}/hospital/v1/type/${type}`,
+    getHospitalsByCostRange: (costRange: string) =>
+      `${API_BASE_URL["data-service"]}/hospital/v1/cost-range/${costRange}`,
   },
   auth_service: {
     testEndpoint: `${API_BASE_URL["auth-service"]}/user/v1/test`,

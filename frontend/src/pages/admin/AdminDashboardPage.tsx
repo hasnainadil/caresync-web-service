@@ -155,12 +155,12 @@ const AdminDashboardPage: React.FC = () => {
       <div className="space-y-6">
 
 
-        <Tabs defaultValue="hospital" className="space-y-8">
+        <Tabs defaultValue="addHospital" className="space-y-8">
           <TabsList>
-            <TabsTrigger value="hospital">Hospital Info</TabsTrigger>
+            {/* <TabsTrigger value="hospital">Hospital Info</TabsTrigger>
             <TabsTrigger value="doctors">Doctors</TabsTrigger>
             <TabsTrigger value="departments">Departments</TabsTrigger>
-            <TabsTrigger value="tests">Tests</TabsTrigger>
+            <TabsTrigger value="tests">Tests</TabsTrigger> */}
             <TabsTrigger value="addHospital">Add Hospital</TabsTrigger>
           </TabsList>
 

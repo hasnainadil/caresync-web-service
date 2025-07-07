@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import Loader from "@/components/ui/Loader";
 
+
 enum ViewStyle {
   Grid = "grid",
   Map = "map",
@@ -21,6 +22,8 @@ const HospitalsPage: React.FC = () => {
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [viewStyle, setViewStyle] = useState(ViewStyle.Grid);
+  const PAGE_SIZE = 9;
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Mock data for demonstration
   useEffect(() => {
@@ -44,17 +47,109 @@ const HospitalsPage: React.FC = () => {
     }
   }, []);
 
+  // Reset to first page when hospitals change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [hospitals]);
+
   const handleSearch = async (filters: HospitalSearchCriteria) => {
     setIsLoading(true);
     try {
       console.log("Searching with filters:", filters);
-      const response = await apiClient.searchHospitalsByCriteria(filters);
-      setHospitals(response as unknown as Hospital[]);
+      
+      // Initialize arrays to store results from each endpoint
+      let zoneHospitals: Hospital[] = [];
+      let typeHospitals: Hospital[] = [];
+      let costRangeHospitals: Hospital[] = [];
+      
+      // Call endpoints based on applied filters
+      const promises: Promise<Hospital[]>[] = [];
+      
+      if (filters.zoneId) {
+        promises.push(apiClient.getHospitalsByZone(filters.zoneId));
+      }
+      
+      if (filters.types && filters.types.length > 0) {
+        // Call getHospitalsByType for each selected type
+        const typePromises = filters.types.map(type => apiClient.getHospitalsByType(type));
+        promises.push(...typePromises);
+      }
+      
+      if (filters.costRange) {
+        promises.push(apiClient.getHospitalsByCostRange(filters.costRange));
+      }
+      
+      // If no filters are applied, get all hospitals
+      if (promises.length === 0) {
+        const allHospitals = await apiClient.getAllHospitals();
+        setHospitals(allHospitals);
+        toast({
+          title: "Search completed",
+          description: `Found ${allHospitals.length} hospitals`,
+        });
+        return;
+      }
+      
+      // Execute all API calls
+      const results = await Promise.all(promises);
+      
+      // Extract results based on which filters were applied
+      let resultIndex = 0;
+      if (filters.zoneId) {
+        zoneHospitals = results[resultIndex++];
+      }
+      if (filters.types && filters.types.length > 0) {
+        // Combine all type results (union of all selected types)
+        const allTypeResults = results.slice(resultIndex, resultIndex + filters.types.length);
+        typeHospitals = allTypeResults.flat();
+        resultIndex += filters.types.length;
+      }
+      if (filters.costRange) {
+        costRangeHospitals = results[resultIndex++];
+      }
+      
+      // Intersect the results to find hospitals that match ALL applied filters
+      let finalHospitals: Hospital[] = [];
+      
+      if (filters.zoneId && filters.types && filters.types.length > 0 && filters.costRange) {
+        // All three filters applied
+        finalHospitals = zoneHospitals.filter(zoneHospital => 
+          typeHospitals.some(typeHospital => typeHospital.id === zoneHospital.id) &&
+          costRangeHospitals.some(costHospital => costHospital.id === zoneHospital.id)
+        );
+      } else if (filters.zoneId && filters.types && filters.types.length > 0) {
+        // Zone and type filters
+        finalHospitals = zoneHospitals.filter(zoneHospital => 
+          typeHospitals.some(typeHospital => typeHospital.id === zoneHospital.id)
+        );
+      } else if (filters.zoneId && filters.costRange) {
+        // Zone and cost range filters
+        finalHospitals = zoneHospitals.filter(zoneHospital => 
+          costRangeHospitals.some(costHospital => costHospital.id === zoneHospital.id)
+        );
+      } else if (filters.types && filters.types.length > 0 && filters.costRange) {
+        // Type and cost range filters
+        finalHospitals = typeHospitals.filter(typeHospital => 
+          costRangeHospitals.some(costHospital => costHospital.id === typeHospital.id)
+        );
+      } else if (filters.zoneId) {
+        // Only zone filter
+        finalHospitals = zoneHospitals;
+      } else if (filters.types && filters.types.length > 0) {
+        // Only type filter
+        finalHospitals = typeHospitals;
+      } else if (filters.costRange) {
+        // Only cost range filter
+        finalHospitals = costRangeHospitals;
+      }
+      
+      setHospitals(finalHospitals);
       toast({
         title: "Search completed",
-        description: `Found ${hospitals.length} hospitals`,
+        description: `Found ${finalHospitals.length} hospitals`,
       });
     } catch (error) {
+      console.error("Search error:", error);
       toast({
         title: "Search failed",
         description: "Please try again.",
@@ -64,6 +159,9 @@ const HospitalsPage: React.FC = () => {
       setIsLoading(false);
     }
   };
+
+  const totalPages = Math.ceil(hospitals.length / PAGE_SIZE);
+  const paginatedHospitals = hospitals.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   return (
     <Layout>
@@ -104,10 +202,12 @@ const HospitalsPage: React.FC = () => {
               />
 
               <button
+                type="button"
                 onClick={() => {
                   setViewStyle(ViewStyle.Grid);
                   sessionStorage.setItem(ViewStyle.MapViewStyle, ViewStyle.Grid);
                 }}
+                id="grid-view-button"
                 className="relative px-4 py-2 rounded-xl transition-colors duration-200 z-10 w-[120px]"
               >
                 <span className={cn(
@@ -119,6 +219,8 @@ const HospitalsPage: React.FC = () => {
               </button>
 
               <button
+                type="button"
+                id="map-view-button"
                 onClick={() => {
                   setViewStyle(ViewStyle.Map);
                   sessionStorage.setItem(ViewStyle.MapViewStyle, ViewStyle.Map);
@@ -143,11 +245,41 @@ const HospitalsPage: React.FC = () => {
         ) : (
           <>
             {viewStyle === ViewStyle.Grid ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {hospitals.map((hospital) => (
-                  <HospitalCard key={hospital.id} hospital={hospital} />
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {paginatedHospitals.map((hospital) => (
+                    <HospitalCard key={hospital.id} hospital={hospital} />
+                  ))}
+                </div>
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="flex justify-center mt-8 gap-2">
+                    <button
+                      className="px-3 py-1 rounded border bg-white text-gray-700 disabled:opacity-50"
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                    >
+                      Previous
+                    </button>
+                    {Array.from({ length: totalPages }, (_, i) => (
+                      <button
+                        key={i + 1}
+                        className={`px-3 py-1 rounded border ${currentPage === i + 1 ? 'bg-blue-500 text-white' : 'bg-white text-gray-700'}`}
+                        onClick={() => setCurrentPage(i + 1)}
+                      >
+                        {i + 1}
+                      </button>
+                    ))}
+                    <button
+                      className="px-3 py-1 rounded border bg-white text-gray-700 disabled:opacity-50"
+                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+              </>
             ) : (
               <HospitalMap hospitals={hospitals} className="mt-6" />
             )}

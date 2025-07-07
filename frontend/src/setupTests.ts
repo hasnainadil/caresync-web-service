@@ -77,3 +77,12 @@ jest.mock('react-leaflet', () => ({
     setView: jest.fn(),
   }),
 }));
+
+// Mock ResizeObserver globally for tests (for map and other components)
+if (typeof window !== 'undefined' && !window.ResizeObserver) {
+  window.ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+}

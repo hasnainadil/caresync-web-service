@@ -261,6 +261,63 @@ class ApiClient {
     });
   }
 
+  async getHospitalsByZone(zoneId: number): Promise<Hospital[]> {
+    try {
+      const token = await this.getToken();
+      const response = await axios.get(
+        API_URLS.data_service.getHospitalsByZone(zoneId),
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error in getHospitalsByZone:");
+      console.error(error);
+      throw error;
+    }
+  }
+
+  async getHospitalsByType(type: string): Promise<Hospital[]> {
+    try {
+      const token = await this.getToken();
+      const response = await axios.get(
+        API_URLS.data_service.getHospitalsByType(type),
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error in getHospitalsByType:");
+      console.error(error);
+      throw error;
+    }
+  }
+
+  async getHospitalsByCostRange(costRange: string): Promise<Hospital[]> {
+    try {
+      const token = await this.getToken();
+      const response = await axios.get(
+        API_URLS.data_service.getHospitalsByCostRange(costRange),
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error in getHospitalsByCostRange:");
+      console.error(error);
+      throw error;
+    }
+  }
+
   async getAllLocations(): Promise<LocationResponse[]> {
     const token = await this.getToken();
     const response = await axios.get(

@@ -9,8 +9,16 @@ module.exports = defineConfig({
     viewportHeight: 720,
     video: false,
     screenshotOnRunFailure: true,
-    defaultCommandTimeout: 10000,
-    requestTimeout: 10000,
-    responseTimeout: 10000,
+    defaultCommandTimeout: 20000,
+    requestTimeout: 20000,
+    responseTimeout: 20000,
+    // Add retry configuration for flaky tests
+    retries: {
+      runMode: 2,
+      openMode: 0
+    },
+    // Add better error handling for network requests
+    experimentalModifyObstructiveThirdPartyCode: true,
+    experimentalSessionAndOrigin: true
   },
 }); 

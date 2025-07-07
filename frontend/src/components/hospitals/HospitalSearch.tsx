@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import Select from 'react-select';
 import { Card, CardContent } from '@/components/ui/card';
 import { Search } from 'lucide-react';
 import { HospitalSearchCriteria, HOSPITAL_TYPE, COST_RANGE } from '@/types';
@@ -13,6 +12,11 @@ interface HospitalSearchProps {
   isLoading?: boolean;
 }
 
+interface OptionType {
+  value: string;
+  label: string;
+}
+
 const HospitalSearch: React.FC<HospitalSearchProps> = ({ onSearch, isLoading }) => {
   const [filters, setFilters] = useState<HospitalSearchCriteria>({
     costRange: undefined,
@@ -20,31 +24,68 @@ const HospitalSearch: React.FC<HospitalSearchProps> = ({ onSearch, isLoading }) 
     types: undefined,
   });
 
+  // Options for react-select
+  const zoneOptions: OptionType[] = [
+    { value: '1', label: 'Zone 1 - Dhaka' },
+    { value: '2', label: 'Zone 2 - Chittagong' },
+    { value: '3', label: 'Zone 3 - Sylhet' },
+    { value: '4', label: 'Zone 4 - Rajshahi' },
+    { value: '5', label: 'Zone 5 - Khulna' },
+  ];
+
+  const hospitalTypeOptions: OptionType[] = [
+    { value: HOSPITAL_TYPE.PUBLIC, label: 'Public' },
+    { value: HOSPITAL_TYPE.PRIVATE, label: 'Private' },
+    { value: HOSPITAL_TYPE.GENERAL, label: 'General' },
+    { value: HOSPITAL_TYPE.SPECIALIZED, label: 'Specialized' },
+    { value: HOSPITAL_TYPE.CHILDREN, label: 'Children' },
+    { value: HOSPITAL_TYPE.MATERNITY, label: 'Maternity' },
+    { value: HOSPITAL_TYPE.RESEARCH, label: 'Research' },
+    { value: HOSPITAL_TYPE.REHABILITATION, label: 'Rehabilitation' },
+  ];
+
+  const costRangeOptions: OptionType[] = [
+    { value: COST_RANGE.VERY_LOW, label: 'Very Low' },
+    { value: COST_RANGE.LOW, label: 'Low' },
+    { value: COST_RANGE.MODERATE, label: 'Moderate' },
+    { value: COST_RANGE.HIGH, label: 'High' },
+    { value: COST_RANGE.VERY_HIGH, label: 'Very High' },
+  ];
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSearch(filters);
   };
 
-  const handleCostRangeChange = (value: string) => {
+  const handleCostRangeChange = (selectedOption: OptionType | null) => {
     setFilters({
       ...filters,
-      costRange: value as COST_RANGE,
+      costRange: selectedOption ? (selectedOption.value as COST_RANGE) : undefined,
     });
   };
 
-  const handleZoneChange = (value: string) => {
+  const handleZoneChange = (selectedOption: OptionType | null) => {
     setFilters({
       ...filters,
-      zoneId: value ? parseInt(value) : undefined,
+      zoneId: selectedOption ? parseInt(selectedOption.value) : undefined,
     });
   };
 
-  const handleTypeChange = (value: string) => {
+  const handleTypeChange = (selectedOptions: OptionType[] | null) => {
+    const selectedValues = selectedOptions ? selectedOptions.map(option => option.value as HOSPITAL_TYPE) : [];
     setFilters({
       ...filters,
-      types: value ? [value as HOSPITAL_TYPE] : undefined,
+      types: selectedValues.length > 0 ? selectedValues : undefined,
     });
   };
+
+  // Convert current values to react-select format
+  const selectedZoneOption = filters.zoneId ? zoneOptions.find(option => option.value === filters.zoneId?.toString()) : null;
+  const selectedCostRangeOption = filters.costRange ? costRangeOptions.find(option => option.value === filters.costRange) : null;
+  const selectedTypeOptions = filters.types ? filters.types.map(type => ({
+    value: type,
+    label: hospitalTypeOptions.find(option => option.value === type)?.label || type
+  })) : [];
 
   return (
     <Card className="mb-8 shadow-md rounded-2xl">
@@ -53,53 +94,39 @@ const HospitalSearch: React.FC<HospitalSearchProps> = ({ onSearch, isLoading }) 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="zone">Zone</Label>
-              <Select onValueChange={handleZoneChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select zone" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">Zone 1 - Dhaka</SelectItem>
-                  <SelectItem value="2">Zone 2 - Chittagong</SelectItem>
-                  <SelectItem value="3">Zone 3 - Sylhet</SelectItem>
-                  <SelectItem value="4">Zone 4 - Rajshahi</SelectItem>
-                  <SelectItem value="5">Zone 5 - Khulna</SelectItem>
-                </SelectContent>
-              </Select>
+              <Select
+                options={zoneOptions}
+                value={selectedZoneOption}
+                onChange={handleZoneChange}
+                placeholder="Select zone..."
+                isDisabled={isLoading}
+                isClearable
+              />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="type">Hospital Type</Label>
-              <Select onValueChange={handleTypeChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={HOSPITAL_TYPE.PUBLIC}>Public</SelectItem>
-                  <SelectItem value={HOSPITAL_TYPE.PRIVATE}>Private</SelectItem>
-                  <SelectItem value={HOSPITAL_TYPE.GENERAL}>General</SelectItem>
-                  <SelectItem value={HOSPITAL_TYPE.SPECIALIZED}>Specialized</SelectItem>
-                  <SelectItem value={HOSPITAL_TYPE.CHILDREN}>Children</SelectItem>
-                  <SelectItem value={HOSPITAL_TYPE.MATERNITY}>Maternity</SelectItem>
-                  <SelectItem value={HOSPITAL_TYPE.RESEARCH}>Research</SelectItem>
-                  <SelectItem value={HOSPITAL_TYPE.REHABILITATION}>Rehabilitation</SelectItem>
-                </SelectContent>
-              </Select>
+              <Select
+                isMulti
+                options={hospitalTypeOptions}
+                value={selectedTypeOptions}
+                onChange={handleTypeChange}
+                placeholder="Select types..."
+                isDisabled={isLoading}
+                isClearable
+              />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="costRange">Cost Range</Label>
-              <Select onValueChange={handleCostRangeChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select cost range" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={COST_RANGE.VERY_LOW}>Very Low</SelectItem>
-                  <SelectItem value={COST_RANGE.LOW}>Low</SelectItem>
-                  <SelectItem value={COST_RANGE.MODERATE}>Moderate</SelectItem>
-                  <SelectItem value={COST_RANGE.HIGH}>High</SelectItem>
-                  <SelectItem value={COST_RANGE.VERY_HIGH}>Very High</SelectItem>
-                </SelectContent>
-              </Select>
+              <Select
+                options={costRangeOptions}
+                value={selectedCostRangeOption}
+                onChange={handleCostRangeChange}
+                placeholder="Select cost range..."
+                isDisabled={isLoading}
+                isClearable
+              />
             </div>
           </div>
 

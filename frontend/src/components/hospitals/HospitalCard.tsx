@@ -30,7 +30,7 @@ const HospitalCard: React.FC<HospitalCardProps> = ({ hospital }) => {
       <Card className="relative h-full border-l-8 border-blue-400 bg-gradient-to-br from-blue-50 to-cyan-50 hover:shadow-2xl hover:scale-[1.025] transition-all duration-200 cursor-pointer group overflow-hidden flex flex-col justify-between shadow-md">
         {/* Decorative background */}
         <div className="absolute right-0 top-0 w-32 h-32 bg-blue-100 rounded-bl-full opacity-30 pointer-events-none z-0" />
-        <CardHeader className="z-10 relative pb-2 p-2">
+        <CardHeader className=" relative pb-2 p-2">
           <div className="flex flex-col justify-between items-start">
             <div className="flex gap-1 flex-wrap justify-end w-full">
               {hospital.types.map((type) => (
