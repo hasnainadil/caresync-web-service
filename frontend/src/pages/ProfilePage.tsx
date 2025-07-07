@@ -10,6 +10,9 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/sonner";
 import { Mail, User as UserIcon, MapPin, Edit2, Save, X } from "lucide-react";
+import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
+import { deleteUser } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 
 const ProfilePage: React.FC = () => {
   const auth = useAuth();
@@ -21,6 +24,8 @@ const ProfilePage: React.FC = () => {
     email: "",
     password: ""
   });
+  const navigate = useNavigate();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -80,6 +85,26 @@ const ProfilePage: React.FC = () => {
       toast.error("Failed to update profile");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!auth.user) return;
+    setLoading(true);
+    try {
+      // 1. Delete from backend
+      await apiClient.deeleteUserById(auth.user.uid);
+      // 2. Delete from Firebase
+      await deleteUser(auth.user);
+      toast.success("Account deleted successfully");
+      // 3. Log out and redirect
+      await auth.logout();
+      navigate("/");
+    } catch (err: any) {
+      toast.error("Failed to delete account");
+    } finally {
+      setLoading(false);
+      setShowDeleteDialog(false);
     }
   };
 
@@ -172,7 +197,32 @@ const ProfilePage: React.FC = () => {
             )}
           </CardContent>
           <Separator className="mt-2" />
-          <CardFooter className="flex justify-end translate-y-3">
+          <CardFooter className="flex justify-between translate-y-3">
+            <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" onClick={() => setShowDeleteDialog(true)} className="flex items-center gap-1">
+                  <X className="w-4 h-4" /> Delete Account
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Account</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete your account? This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel asChild>
+                    <Button variant="outline">Cancel</Button>
+                  </AlertDialogCancel>
+                  <AlertDialogAction asChild>
+                    <Button variant="destructive" onClick={handleDeleteAccount} disabled={loading}>
+                      Delete
+                    </Button>
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
             {!editMode && (
               <Button variant="secondary" onClick={handleEdit} className="flex items-center gap-1">
                 <Edit2 className="w-4 h-4" /> Edit Profile
