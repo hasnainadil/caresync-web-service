@@ -101,6 +101,8 @@ const ProfilePage: React.FC = () => {
       await auth.logout();
       navigate("/");
     } catch (err: any) {
+      console.log("error");
+      console.log(err);
       toast.error("Failed to delete account");
     } finally {
       setLoading(false);
@@ -200,7 +202,7 @@ const ProfilePage: React.FC = () => {
           <CardFooter className="flex justify-between translate-y-3">
             <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive" onClick={() => setShowDeleteDialog(true)} className="flex items-center gap-1">
+                <Button id="delete-account-button" variant="destructive" onClick={() => setShowDeleteDialog(true)} className="flex items-center gap-1">
                   <X className="w-4 h-4" /> Delete Account
                 </Button>
               </AlertDialogTrigger>
@@ -216,7 +218,7 @@ const ProfilePage: React.FC = () => {
                     <Button variant="outline">Cancel</Button>
                   </AlertDialogCancel>
                   <AlertDialogAction asChild>
-                    <Button variant="destructive" onClick={handleDeleteAccount} disabled={loading}>
+                    <Button id="delete-account-confirm-button" variant="destructive" onClick={handleDeleteAccount} disabled={loading}>
                       Delete
                     </Button>
                   </AlertDialogAction>
