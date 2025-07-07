@@ -17,6 +17,7 @@ import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import AddDoctorPage from "./pages/admin/AddDoctorPage";
 import TestPage from "./pages/test";
 import ProfilePage from "@/pages/ProfilePage";
+// import UpdateHospitalPage from "./pages/admin/UpdateHospitalPage";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ const App = () => (
             <Route path="/admin/dashboard/:hospitalId/add-doctor" element={<AddDoctorPage />} />
             <Route path="/admin" element={<AdminDashboardPage />} />
             <Route path="/test" element={<TestPage />} />
+            {/* <Route path="/admin/update/hospital/:id" element={<UpdateHospitalPage />} /> */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

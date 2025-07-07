@@ -239,17 +239,24 @@ class ApiClient {
   }
 
   async updateHospital(data: HospitalRegistrationRequest): Promise<Hospital> {
-    const token = await this.getToken();
-    const response = await axios.put(
-      API_URLS.data_service.updateHospital,
-      data,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    return response.data;
+    try {
+      const token = await this.getToken();
+      // console.log("endpoint", API_URLS.data_service.updateHospital);
+      const response = await axios.put(
+        API_URLS.data_service.updateHospital,
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error in updateHospital:");
+      console.error(error);
+      throw error;
+    }
   }
 
   async deleteHospitalById(id: string): Promise<void> {
