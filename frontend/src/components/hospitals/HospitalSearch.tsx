@@ -25,14 +25,6 @@ const HospitalSearch: React.FC<HospitalSearchProps> = ({ onSearch, isLoading }) 
   });
 
   // Options for react-select
-  const zoneOptions: OptionType[] = [
-    { value: '1', label: 'Zone 1 - Dhaka' },
-    { value: '2', label: 'Zone 2 - Chittagong' },
-    { value: '3', label: 'Zone 3 - Sylhet' },
-    { value: '4', label: 'Zone 4 - Rajshahi' },
-    { value: '5', label: 'Zone 5 - Khulna' },
-  ];
-
   const hospitalTypeOptions: OptionType[] = [
     { value: HOSPITAL_TYPE.PUBLIC, label: 'Public' },
     { value: HOSPITAL_TYPE.PRIVATE, label: 'Private' },
@@ -64,10 +56,11 @@ const HospitalSearch: React.FC<HospitalSearchProps> = ({ onSearch, isLoading }) 
     });
   };
 
-  const handleZoneChange = (selectedOption: OptionType | null) => {
+  const handleZoneIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
     setFilters({
       ...filters,
-      zoneId: selectedOption ? parseInt(selectedOption.value) : undefined,
+      zoneId: value ? parseInt(value) : undefined,
     });
   };
 
@@ -80,7 +73,6 @@ const HospitalSearch: React.FC<HospitalSearchProps> = ({ onSearch, isLoading }) 
   };
 
   // Convert current values to react-select format
-  const selectedZoneOption = filters.zoneId ? zoneOptions.find(option => option.value === filters.zoneId?.toString()) : null;
   const selectedCostRangeOption = filters.costRange ? costRangeOptions.find(option => option.value === filters.costRange) : null;
   const selectedTypeOptions = filters.types ? filters.types.map(type => ({
     value: type,
@@ -93,14 +85,16 @@ const HospitalSearch: React.FC<HospitalSearchProps> = ({ onSearch, isLoading }) 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="zone">Zone</Label>
-              <Select
-                options={zoneOptions}
-                value={selectedZoneOption}
-                onChange={handleZoneChange}
-                placeholder="Select zone..."
-                isDisabled={isLoading}
-                isClearable
+              <Label htmlFor="zoneId">Zone ID</Label>
+              <Input
+                id="zoneId"
+                name="zoneId"
+                type="number"
+                min={1}
+                value={filters.zoneId ?? ""}
+                onChange={handleZoneIdChange}
+                placeholder="Enter zone ID..."
+                disabled={isLoading}
               />
             </div>
 
