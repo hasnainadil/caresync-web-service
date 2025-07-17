@@ -7,7 +7,7 @@ export interface User {
 
 export interface HospitalLocation {
   id: number;
-  locationType: 'HOSPITAL';
+  locationType: LOCATION_TYPE.HOSPITAL;
   address: string;
   thana: string;
   po: string;
@@ -35,9 +35,15 @@ export enum COST_RANGE {
   VERY_HIGH = "VERY_HIGH"
 }
 
+export enum LOCATION_TYPE {
+  USER = "USER",
+  DOCTOR = "DOCTOR",
+  HOSPITAL = "HOSPITAL"
+}
+
 export interface LocationResponse {
   id?: number | null;
-  locationType: "USER" | "DOCTOR" | "HOSPITAL" | null;
+  locationType: LOCATION_TYPE | null;
   address: string | null;
   thana: string | null;
   po: string | null;
@@ -105,14 +111,21 @@ export interface HospitalFilter{
   sort_by?: string;
 }
 
-export interface UserRegistration {
+export enum ROLE {
+  DEFAULT = "DEFAULT",
+  ADMIN = "ADMIN"
+}
+
+
+
+export interface Registration {
   userId: string;
-  accessToken: string;
+  // accessToken
   name: string;
   email: string;
   password: string;
   location: {
-    locationType: "USER";
+    locationType: LOCATION_TYPE.USER;
     address: string;
     thana: string;
     po: string;
@@ -120,6 +133,13 @@ export interface UserRegistration {
     postalCode: number;
     zoneId: number;
   };
+}
+export interface UserRegistration extends Registration {
+  role: ROLE.DEFAULT;
+}
+
+export interface AdminRegistration extends Registration {
+  role: ROLE.ADMIN;
 }
 
 export interface Doctor {
@@ -178,3 +198,149 @@ export interface HospitalRegistrationRequest {
 
 // Alias for SearchFilters to maintain compatibility
 export type SearchFilters = HospitalFilter;
+
+// --- Test API Types ---
+export enum TEST_TYPE {
+  BLOOD = "BLOOD",
+  HEART = "HEART",
+  BRAIN = "BRAIN",
+  LUNG = "LUNG",
+  EYE = "EYE",
+  BONE = "BONE",
+  SKIN = "SKIN",
+  GENERAL = "GENERAL",
+  LIVER = "LIVER",
+  KIDNEY = "KIDNEY"
+}
+
+export interface HospitalResponse {
+  id: number;
+  name: string;
+  phoneNumber: string;
+  website?: string;
+  types: string[];
+  icus: number;
+  costRange: string;
+  latitude: number;
+  longitude: number;
+  locationResponse: LocationResponse;
+}
+
+export interface TestResponse {
+  id: number;
+  name: string;
+  types: TEST_TYPE[];
+  price: number;
+  hospitalResponse: HospitalResponse;
+}
+
+export interface TestAddRequest {
+  userId: string;
+  name: string;
+  types: TEST_TYPE[];
+  hospitalId: number;
+  price: number;
+}
+
+export interface TestUpdateRequest {
+  id: number;
+  userId: string;
+  name: string;
+  types: TEST_TYPE[];
+  price: number;
+}
+
+export interface TestSearchRequest {
+  name?: string;
+  types?: TEST_TYPE[];
+  minPrice?: number;
+  maxPrice?: number;
+  zoneId?: number;
+}
+
+// --- Doctor API Types ---
+export interface DepartmentResponse {
+  id: number;
+  name: string;
+  description: string;
+}
+
+export interface DoctorHospitalResponse {
+  id: number;
+  hospitalId: number;
+  hospitalName: string;
+  appointmentFee: number;
+  weeklySchedules: string[];
+  appointmentTimes: string[];
+}
+
+export interface DoctorResponse {
+  id: number;
+  name: string;
+  specialties: string[];
+  phoneNumber: string;
+  email: string;
+  departmentResponse: DepartmentResponse;
+  locationResponse: LocationResponse;
+  doctorHospitals: DoctorHospitalResponse[];
+}
+
+export interface DoctorHospitalCreateRequest {
+  hospitalId: number;
+  appointmentFee?: number;
+  weeklySchedules?: string[];
+  appointmentTimes?: string[];
+}
+
+export interface DoctorRegistrationRequest {
+  userId?: string;
+  name: string;
+  specialties?: string[];
+  phoneNumber?: string;
+  email?: string;
+  departmentName?: string;
+  location: LocationResponse;
+  doctorHospitals?: DoctorHospitalCreateRequest[];
+}
+
+export interface DoctorUpdateRequest {
+  id: number;
+  userId?: string;
+  name?: string;
+  specialties?: string[];
+  phoneNumber?: string;
+  email?: string;
+  departmentName?: string;
+  location?: LocationResponse;
+  doctorHospitals?: DoctorHospitalCreateRequest[];
+}
+
+// --- Feedback API Types ---
+export enum FEEDBACK_TARGET_TYPE {
+  DOCTOR = "DOCTOR",
+  HOSPITAL = "HOSPITAL"
+}
+
+export interface FeedbackResponse {
+  id: number;
+  userId: string;
+  targetType: FEEDBACK_TARGET_TYPE;
+  targetId: number;
+  rating: number;
+  comment: string;
+  createdAt: string;
+}
+
+export interface FeedbackCreateRequest {
+  userId: string;
+  targetType: FEEDBACK_TARGET_TYPE;
+  targetId: number;
+  rating: number;
+  comment?: string;
+}
+
+export interface FeedbackUpdateRequest {
+  userId: string;
+  rating?: number;
+  comment?: string;
+}

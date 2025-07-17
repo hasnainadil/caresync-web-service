@@ -3,10 +3,10 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Star, Trash, Edit } from 'lucide-react';
-import { apiClient } from '@/lib/api_dummy';
+import { apiClient } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { Rating } from '@/types';
+import { Rating, FEEDBACK_TARGET_TYPE } from '@/types';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,7 +29,7 @@ const RatingForm: React.FC<RatingFormProps> = ({ hospitalId, onRatingAdded, exis
   const [reviewText, setReviewText] = useState(existingRating?.review_text || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,18 +54,22 @@ const RatingForm: React.FC<RatingFormProps> = ({ hospitalId, onRatingAdded, exis
     setIsSubmitting(true);
     try {
       if (existingRating) {
-        await apiClient.updateRating(existingRating.id.toString(), {
+        await apiClient.updateFeedback(existingRating.id, {
+          userId: user?.uid || '',
           rating,
-          review_text: reviewText,
+          comment: reviewText,
         });
         toast({
           title: "Review updated",
           description: "Your review has been updated successfully!",
         });
       } else {
-        await apiClient.addHospitalRating(hospitalId.toString(), {
+        await apiClient.addFeedback({
+          userId: user?.uid || '',
+          targetType: FEEDBACK_TARGET_TYPE.HOSPITAL,
+          targetId: hospitalId,
           rating,
-          review_text: reviewText,
+          comment: reviewText,
         });
         toast({
           title: "Review submitted",
@@ -91,7 +95,7 @@ const RatingForm: React.FC<RatingFormProps> = ({ hospitalId, onRatingAdded, exis
     if (!existingRating) return;
 
     try {
-      await apiClient.deleteRating(existingRating.id.toString());
+      await apiClient.deleteFeedbackById(existingRating.id, user?.uid || '');
       toast({
         title: "Review deleted",
         description: "Your review has been deleted successfully.",
@@ -122,7 +126,7 @@ const RatingForm: React.FC<RatingFormProps> = ({ hospitalId, onRatingAdded, exis
   return (
     <>
       <Card>
-        <CardHeader>
+        <CardHeader className='p-4 pb-3 pl-6'>
           <CardTitle className="flex justify-between items-center">
             <span>{existingRating ? 'Edit Your Review' : 'Write a Review'}</span>
             {existingRating && (
@@ -136,10 +140,10 @@ const RatingForm: React.FC<RatingFormProps> = ({ hospitalId, onRatingAdded, exis
             )}
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <CardContent className='pb-3 w-full'>
+          <form onSubmit={handleSubmit} className="space-y-3 w-full">
             <div>
-              <label className="block text-sm font-medium mb-2">Rating</label>
+              <label className="block text-sm font-medium mb-1 pl-1">Rating</label>
               <div className="flex space-x-1">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button

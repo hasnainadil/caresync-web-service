@@ -13,8 +13,10 @@ import { Mail, User as UserIcon, MapPin, Edit2, Save, X } from "lucide-react";
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 import { deleteUser } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 const ProfilePage: React.FC = () => {
+  const { userId } = useParams<{ userId: string }>();
   const auth = useAuth();
   const [profile, setProfile] = useState<UserResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -35,8 +37,8 @@ const ProfilePage: React.FC = () => {
       }
       try {
         setLoading(true);
-        const userId = auth.user.uid;
-        const data = await apiClient.getUserById(userId);
+        const userIdToFetch = userId || auth.user.uid;
+        const data = await apiClient.getUserById(userIdToFetch);
         setProfile(data);
         setForm({
           name: data.name,
@@ -50,7 +52,7 @@ const ProfilePage: React.FC = () => {
       }
     };
     fetchProfile();
-  }, [auth.user]);
+  }, [auth.user, userId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -145,14 +147,15 @@ const ProfilePage: React.FC = () => {
                 <div className="flex items-start gap-2">
                   <MapPin className="w-5 h-5 text-blue-400" />
                   <span className="font-medium">Location:</span>
-                  <div className="flex flex-wrap gap-2 translate-y-[2px]">
+                  {location && <div className="flex flex-wrap gap-2 translate-y-[2px]">
                     <Badge variant="secondary">{location.address}</Badge>
                     <Badge variant="secondary">Thana: {location.thana}</Badge>
                     <Badge variant="secondary">PO: {location.po}</Badge>
                     <Badge variant="secondary">City: {location.city}</Badge>
                     <Badge variant="secondary">Postal: {location.postalCode}</Badge>
                     <Badge variant="secondary">Zone: {location.zoneId}</Badge>
-                  </div>
+                  </div>}
+                  {!location && <span className="text-gray-500">No location found</span>}
                 </div>
               </div>
             ) : (
@@ -200,7 +203,7 @@ const ProfilePage: React.FC = () => {
           </CardContent>
           <Separator className="mt-2" />
           <CardFooter className="flex justify-between translate-y-3">
-            <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+            {auth.user.uid === profile.id && <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
               <AlertDialogTrigger asChild>
                 <Button id="delete-account-button" variant="destructive" onClick={() => setShowDeleteDialog(true)} className="flex items-center gap-1">
                   <X className="w-4 h-4" /> Delete Account
@@ -225,7 +228,8 @@ const ProfilePage: React.FC = () => {
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
-            {!editMode && (
+            }
+            {!editMode && auth.user.uid === profile.id && (
               <Button variant="secondary" onClick={handleEdit} className="flex items-center gap-1">
                 <Edit2 className="w-4 h-4" /> Edit Profile
               </Button>

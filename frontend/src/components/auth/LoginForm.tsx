@@ -37,7 +37,8 @@ const LoginForm: React.FC = () => {
         });
         navigate("/hospitals");
       } else {
-        console.log(result.error);
+        console.log("result", result);
+        console.log("result.error", result.error);
         toast({
           title: "Login failed",
           description: result.error || "Invalid email or password.",
@@ -45,6 +46,7 @@ const LoginForm: React.FC = () => {
         });
       }
     } catch (error) {
+      console.log("error");
       console.log(error);
       toast({
         title: "Login failed",

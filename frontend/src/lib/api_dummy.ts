@@ -1,4 +1,4 @@
-import { Appointment, Rating, Hospital, Doctor, Department, DiagnosticTest, HospitalSearchCriteria, HOSPITAL_TYPE, COST_RANGE, LocationResponse } from '@/types';
+import { Appointment, Rating, Hospital, Doctor, Department, DiagnosticTest, HospitalSearchCriteria, HOSPITAL_TYPE, COST_RANGE, LocationResponse, DoctorResponse } from '@/types';
 import { UserRegistration, HospitalListItem } from './api';
 import { mockDoctors, mockHospitals } from './data';
 
@@ -71,6 +71,84 @@ const mockAppointments: Appointment[] = [
   }
 ];
 
+// Dummy hospital data
+const dummyHospital = {
+  id: 1,
+  name: "City General Hospital",
+  phoneNumber: "+1234567890",
+  website: "https://citygeneral.com",
+  types: ["GENERAL", "PUBLIC"],
+  icus: 10,
+  costRange: "MODERATE",
+  latitude: 40.7128,
+  longitude: -74.0060,
+  locationResponse: {
+    id: 1,
+    locationType: "HOSPITAL",
+    address: "123 Main Street",
+    thana: "Downtown",
+    po: "Central Post Office",
+    city: "New York",
+    postalCode: 10001,
+    zoneId: 1
+  }
+};
+
+const dummyTests = [
+  {
+    id: 1,
+    name: "Complete Blood Count",
+    types: ["BLOOD", "GENERAL"],
+    price: 50.00,
+    hospitalResponse: dummyHospital
+  },
+  {
+    id: 2,
+    name: "Cardiac Stress Test",
+    types: ["HEART", "GENERAL"],
+    price: 250.00,
+    hospitalResponse: dummyHospital
+  },
+  {
+    id: 3,
+    name: "Liver Function Test",
+    types: ["LIVER"],
+    price: 120.00,
+    hospitalResponse: dummyHospital
+  }
+];
+
+const dummyDoctors = [
+  {
+    id: 1,
+    name: "Dr. John Smith",
+    specialties: ["Cardiology", "Internal Medicine"],
+    phoneNumber: "+1234567890",
+    email: "john.smith@hospital.com",
+    departmentResponse: {
+      id: 1,
+      name: "Cardiology Department",
+      description: "Specialized in heart and cardiovascular diseases"
+    },
+    locationResponse: dummyHospital.locationResponse,
+    doctorHospitals: []
+  },
+  {
+    id: 2,
+    name: "Dr. Sarah Johnson",
+    specialties: ["Pediatrics", "General Medicine"],
+    phoneNumber: "+1987654321",
+    email: "sarah.johnson@hospital.com",
+    departmentResponse: {
+      id: 2,
+      name: "Pediatrics Department",
+      description: "Specialized in children's healthcare"
+    },
+    locationResponse: dummyHospital.locationResponse,
+    doctorHospitals: []
+  }
+];
+
 class DummyApiClient {
   private token: string | null = null;
 
@@ -113,30 +191,30 @@ class DummyApiClient {
 
   async searchHospitals(filters: HospitalSearchCriteria): Promise<{ success: boolean; data: Hospital[] }> {
     await delay(1500);
-    
+
     let filteredHospitals = [...mockHospitals];
-    
+
     // Filter by cost range
     if (filters.costRange) {
-      filteredHospitals = filteredHospitals.filter(hospital => 
+      filteredHospitals = filteredHospitals.filter(hospital =>
         hospital.costRange === COST_RANGE[filters.costRange as keyof typeof COST_RANGE]
       );
     }
-    
+
     // Filter by zone
     if (filters.zoneId) {
-      filteredHospitals = filteredHospitals.filter(hospital => 
+      filteredHospitals = filteredHospitals.filter(hospital =>
         hospital.locationResponse?.zoneId === filters.zoneId
       );
     }
-    
+
     // Filter by types
     if (filters.types && filters.types.length > 0) {
-      filteredHospitals = filteredHospitals.filter(hospital => 
+      filteredHospitals = filteredHospitals.filter(hospital =>
         filters.types!.some(type => hospital.types.includes(type))
       );
     }
-    
+
     return {
       success: true,
       data: filteredHospitals
@@ -416,26 +494,26 @@ class DummyApiClient {
 
   async searchHospitalsByCriteria(criteria: HospitalSearchCriteria): Promise<HospitalListItem[]> {
     await delay(1500);
-    
+
     let filteredHospitals = [...mockHospitals];
-    
+
     // Filter by cost range
     if (criteria.costRange) {
-      filteredHospitals = filteredHospitals.filter(hospital => 
+      filteredHospitals = filteredHospitals.filter(hospital =>
         hospital.costRange === COST_RANGE[criteria.costRange as keyof typeof COST_RANGE]
       );
     }
-    
+
     // Filter by zone
     if (criteria.zoneId) {
-      filteredHospitals = filteredHospitals.filter(hospital => 
+      filteredHospitals = filteredHospitals.filter(hospital =>
         hospital.locationResponse?.zoneId === criteria.zoneId
       );
     }
-    
+
     // Filter by types
     if (criteria.types && criteria.types.length > 0) {
-      filteredHospitals = filteredHospitals.filter(hospital => 
+      filteredHospitals = filteredHospitals.filter(hospital =>
         criteria.types!.some(type => hospital.types.includes(type))
       );
     }
@@ -542,6 +620,16 @@ class DummyApiClient {
   async deleteLocationById(id: string): Promise<void> {
     await delay(500);
     console.log(`Location ${id} deleted`);
+  }
+
+  async getTestsByHospital(hospitalId: string): Promise<any[]> {
+    await delay(1000);
+    return dummyTests;
+  }
+
+  async getDoctorsByHospital(hospitalId: string): Promise<DoctorResponse[]> {
+    await delay(1000);
+    return dummyDoctors;
   }
 }
 

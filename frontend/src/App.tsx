@@ -17,6 +17,7 @@ import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import AddDoctorPage from "./pages/admin/AddDoctorPage";
 import TestPage from "./pages/test";
 import ProfilePage from "@/pages/ProfilePage";
+import DoctorProfilePage from "@/pages/DoctorProfilePage";
 // import UpdateHospitalPage from "./pages/admin/UpdateHospitalPage";
 
 const queryClient = new QueryClient();
@@ -37,6 +38,8 @@ const App = () => (
             <Route path="/verify-otp" element={<VerifyOtpForm />} />
             <Route path="/login" element={<LoginForm />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/profile/:userId" element={<ProfilePage />} />
+            <Route path="/doctor/:doctorId" element={<DoctorProfilePage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="/admin/dashboard/:hospitalId" element={<AdminDashboardPage />} />
             <Route path="/admin/dashboard/:hospitalId/add-doctor" element={<AddDoctorPage />} />

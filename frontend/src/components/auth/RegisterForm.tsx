@@ -10,6 +10,7 @@ import { apiClient } from '@/lib/api';
 import { Link } from 'react-router-dom';
 import { MoveLeft } from 'lucide-react';
 import { deleteUser } from 'firebase/auth';
+import { LOCATION_TYPE, ROLE } from '@/types';
 
 const RegisterForm: React.FC = () => {  const [formData, setFormData] = useState({
     name: '',
@@ -40,12 +41,12 @@ const RegisterForm: React.FC = () => {  const [formData, setFormData] = useState
             // Register with backend
           await apiClient.registerUser({
             userId: result.user.uid,
-            accessToken: accessToken,
+            role: ROLE.DEFAULT,
             name: formData.name,
             email: formData.email,
             password: formData.password,
             location: {
-              locationType: 'USER',
+              locationType: LOCATION_TYPE.USER,
               address: formData.address,
               thana: formData.thana,
               po: formData.po,
