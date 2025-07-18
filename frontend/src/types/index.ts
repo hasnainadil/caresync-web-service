@@ -180,6 +180,7 @@ export interface UserResponse {
   id: string;
   name: string;
   email: string;
+  role: ROLE;
   locationResponse: LocationResponse;
 }
 

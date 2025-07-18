@@ -12,7 +12,8 @@ import { MoveLeft } from 'lucide-react';
 import { deleteUser } from 'firebase/auth';
 import { LOCATION_TYPE, ROLE } from '@/types';
 
-const RegisterForm: React.FC = () => {  const [formData, setFormData] = useState({
+const RegisterForm: React.FC = () => {
+  const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
@@ -22,6 +23,7 @@ const RegisterForm: React.FC = () => {  const [formData, setFormData] = useState
     city: '',
     postalCode: '',
     zoneId: '',
+    role: ROLE.DEFAULT,
   });
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -38,10 +40,10 @@ const RegisterForm: React.FC = () => {  const [formData, setFormData] = useState
         try {
           // Get the access token
           const accessToken = await result.user.getIdToken();
-            // Register with backend
+          // Register with backend
           await apiClient.registerUser({
             userId: result.user.uid,
-            role: ROLE.DEFAULT,
+            role: formData.role,
             name: formData.name,
             email: formData.email,
             password: formData.password,
@@ -67,7 +69,7 @@ const RegisterForm: React.FC = () => {  const [formData, setFormData] = useState
           } catch (deleteError) {
             console.error('Error deleting Firebase user:', deleteError);
           }
-          
+
           toast({
             title: "Registration failed",
             description: error.message,
@@ -78,7 +80,7 @@ const RegisterForm: React.FC = () => {  const [formData, setFormData] = useState
         console.log(result.error);
         toast({
           title: "Registration failed",
-          description: result.error ,
+          description: result.error,
           variant: "destructive",
         });
       }
@@ -94,7 +96,7 @@ const RegisterForm: React.FC = () => {  const [formData, setFormData] = useState
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -202,7 +204,7 @@ const RegisterForm: React.FC = () => {  const [formData, setFormData] = useState
                 />
               </div>
             </div>            {/* Fourth Row */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="postalCode">Postal Code</Label>
                 <Input
@@ -214,7 +216,7 @@ const RegisterForm: React.FC = () => {  const [formData, setFormData] = useState
                   onChange={handleChange}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="zoneId">Zone ID</Label>
                 <Input
@@ -225,6 +227,20 @@ const RegisterForm: React.FC = () => {  const [formData, setFormData] = useState
                   value={formData.zoneId}
                   onChange={handleChange}
                 />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="role">Register as</Label>
+                <select
+                  id="role"
+                  name="role"
+                  value={formData.role}
+                  onChange={handleChange}
+                  className="w-full border rounded px-3 py-2"
+                  required
+                >
+                  <option value={ROLE.DEFAULT}>User</option>
+                  <option value={ROLE.ADMIN}>Admin</option>
+                </select>
               </div>
             </div>
             <div className='flex justify-between align-middle'>

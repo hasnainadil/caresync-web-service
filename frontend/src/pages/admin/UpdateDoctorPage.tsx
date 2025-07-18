@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { apiClient } from '@/lib/api';
-import { DoctorRegistrationRequest, LOCATION_TYPE } from '@/types';
+import { DoctorUpdateRequest, DoctorHospitalCreateRequest, LOCATION_TYPE, DoctorResponse } from '@/types';
 import { toast } from '@/hooks/use-toast';
 
-const initialForm: DoctorRegistrationRequest = {
+const initialForm: DoctorUpdateRequest = {
+  id: 0,
   name: '',
   specialties: [],
   phoneNumber: '',
@@ -21,10 +23,33 @@ const initialForm: DoctorRegistrationRequest = {
   doctorHospitals: [],
 };
 
-const AddDoctorPage: React.FC = () => {
+const UpdateDoctorPage: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
   const [form, setForm] = useState(initialForm);
   const [loading, setLoading] = useState(false);
   const [hospitalInput, setHospitalInput] = useState({ hospitalId: '', appointmentFee: '', weeklySchedules: '', appointmentTimes: '' });
+
+  useEffect(() => {
+    if (id) {
+      apiClient.getDoctorById(id).then((data: DoctorResponse) => {
+        setForm({
+          id: data.id,
+          name: data.name,
+          specialties: data.specialties,
+          phoneNumber: data.phoneNumber,
+          email: data.email,
+          departmentName: data.departmentResponse?.name || '',
+          location: data.locationResponse || initialForm.location,
+          doctorHospitals: data.doctorHospitals?.map((dh) => ({
+            hospitalId: dh.hospitalId,
+            appointmentFee: dh.appointmentFee,
+            weeklySchedules: dh.weeklySchedules,
+            appointmentTimes: dh.appointmentTimes,
+          })) || [],
+        });
+      });
+    }
+  }, [id]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -32,7 +57,7 @@ const AddDoctorPage: React.FC = () => {
       setForm({
         ...form,
         location: {
-          ...form.location,
+          ...form.location!,
           [name.replace('location.', '')]: value,
         },
       });
@@ -63,13 +88,19 @@ const AddDoctorPage: React.FC = () => {
     setHospitalInput({ hospitalId: '', appointmentFee: '', weeklySchedules: '', appointmentTimes: '' });
   };
 
+  const handleDeleteHospital = (idx: number) => {
+    setForm({
+      ...form,
+      doctorHospitals: form.doctorHospitals?.filter((_, i) => i !== idx),
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await apiClient.registerDoctor(form);
-      toast({ title: 'Doctor added successfully!' });
-      setForm(initialForm);
+      await apiClient.updateDoctor(form);
+      toast({ title: 'Doctor updated successfully!' });
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } finally {
@@ -79,7 +110,7 @@ const AddDoctorPage: React.FC = () => {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Add Doctor</h1>
+      <h1 className="text-2xl font-bold mb-4">Update Doctor</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block mb-1">Name</label>
@@ -106,27 +137,27 @@ const AddDoctorPage: React.FC = () => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block mb-1">Address</label>
-              <input name="location.address" value={form.location.address || ''} onChange={handleChange} className="w-full border rounded px-3 py-2" required />
+              <input name="location.address" value={form.location?.address || ''} onChange={handleChange} className="w-full border rounded px-3 py-2" required />
             </div>
             <div>
               <label className="block mb-1">Thana</label>
-              <input name="location.thana" value={form.location.thana || ''} onChange={handleChange} className="w-full border rounded px-3 py-2" required />
+              <input name="location.thana" value={form.location?.thana || ''} onChange={handleChange} className="w-full border rounded px-3 py-2" required />
             </div>
             <div>
               <label className="block mb-1">Post Office</label>
-              <input name="location.po" value={form.location.po || ''} onChange={handleChange} className="w-full border rounded px-3 py-2" required />
+              <input name="location.po" value={form.location?.po || ''} onChange={handleChange} className="w-full border rounded px-3 py-2" required />
             </div>
             <div>
               <label className="block mb-1">City</label>
-              <input name="location.city" value={form.location.city || ''} onChange={handleChange} className="w-full border rounded px-3 py-2" required />
+              <input name="location.city" value={form.location?.city || ''} onChange={handleChange} className="w-full border rounded px-3 py-2" required />
             </div>
             <div>
               <label className="block mb-1">Postal Code</label>
-              <input name="location.postalCode" type="number" value={form.location.postalCode ?? ''} onChange={handleChange} className="w-full border rounded px-3 py-2" required />
+              <input name="location.postalCode" type="number" value={form.location?.postalCode ?? ''} onChange={handleChange} className="w-full border rounded px-3 py-2" required />
             </div>
             <div>
               <label className="block mb-1">Zone ID</label>
-              <input name="location.zoneId" type="number" value={form.location.zoneId ?? ''} onChange={handleChange} className="w-full border rounded px-3 py-2" required />
+              <input name="location.zoneId" type="number" value={form.location?.zoneId ?? ''} onChange={handleChange} className="w-full border rounded px-3 py-2" required />
             </div>
           </div>
         </fieldset>
@@ -142,16 +173,18 @@ const AddDoctorPage: React.FC = () => {
           <button type="button" onClick={handleAddHospital} className="bg-green-600 text-white px-4 py-1 rounded mb-2">Add Hospital</button>
           <ul>
             {form.doctorHospitals?.map((dh, idx) => (
-              <li key={idx} className="text-sm">Hospital ID: {dh.hospitalId}, Fee: {dh.appointmentFee}, Schedules: {dh.weeklySchedules?.join(', ')}, Times: {dh.appointmentTimes?.join(', ')}</li>
+              <li key={idx} className="text-sm flex items-center gap-2">Hospital ID: {dh.hospitalId}, Fee: {dh.appointmentFee}, Schedules: {dh.weeklySchedules?.join(', ')}, Times: {dh.appointmentTimes?.join(', ')}
+                <button type="button" onClick={() => handleDeleteHospital(idx)} className="ml-2 text-xs bg-red-500 text-white px-2 py-1 rounded">Delete</button>
+              </li>
             ))}
           </ul>
         </fieldset>
         <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded" disabled={loading}>
-          {loading ? 'Adding...' : 'Add Doctor'}
+          {loading ? 'Updating...' : 'Update Doctor'}
         </button>
       </form>
     </div>
   );
 };
 
-export default AddDoctorPage; 
+export default UpdateDoctorPage; 

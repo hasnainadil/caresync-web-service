@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState } from 'react';
 import { apiClient } from '@/lib/api';
-import { HOSPITAL_TYPE, COST_RANGE, HospitalRegistrationRequest, LOCATION_TYPE, TestResponse, TEST_TYPE } from '@/types';
+import { HOSPITAL_TYPE, COST_RANGE, HospitalRegistrationRequest, LOCATION_TYPE } from '@/types';
 import { toast } from '@/hooks/use-toast';
 
 const initialForm: Omit<HospitalRegistrationRequest, 'id'> = {
@@ -24,22 +23,9 @@ const initialForm: Omit<HospitalRegistrationRequest, 'id'> = {
   longitude: null,
 };
 
-const UpdateHospitalPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+const AddHospitalPage: React.FC = () => {
   const [form, setForm] = useState(initialForm);
   const [loading, setLoading] = useState(false);
-  const [tests, setTests] = useState<TestResponse[]>([]);
-  const [testForm, setTestForm] = useState({ name: '', types: [], price: '', });
-  const [testLoading, setTestLoading] = useState(false);
-
-  useEffect(() => {
-    if (id) {
-      apiClient.getHospitalById(id).then((data) => {
-        setForm({ ...data, location: data.locationResponse || initialForm.location, website: data.website || '' });
-      });
-      apiClient.getTestsByHospital(id).then(setTests);
-    }
-  }, [id]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -67,8 +53,9 @@ const UpdateHospitalPage: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await apiClient.updateHospital({ ...form, id: Number(id) });
-      toast({ title: 'Hospital updated successfully!' });
+      await apiClient.registerHospital(form as HospitalRegistrationRequest);
+      toast({ title: 'Hospital added successfully!' });
+      setForm(initialForm);
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } finally {
@@ -76,57 +63,10 @@ const UpdateHospitalPage: React.FC = () => {
     }
   };
 
-  // --- Test Management ---
-  const handleTestFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    if (name === 'types') {
-      const options = (e.target as HTMLSelectElement).selectedOptions;
-      setTestForm({ ...testForm, types: Array.from(options).map((o) => o.value as TEST_TYPE) });
-    } else {
-      setTestForm({ ...testForm, [name]: value });
-    }
-  };
-
-  const handleAddTest = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setTestLoading(true);
-    try {
-      if (!id) return;
-      await apiClient.addTest({
-        userId: '', // Set current admin userId if available
-        name: testForm.name,
-        types: testForm.types as TEST_TYPE[],
-        hospitalId: Number(id),
-        price: Number(testForm.price),
-      });
-      toast({ title: 'Test added!' });
-      setTestForm({ name: '', types: [], price: '' });
-      apiClient.getTestsByHospital(id).then(setTests);
-    } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    } finally {
-      setTestLoading(false);
-    }
-  };
-
-  const handleDeleteTest = async (testId: number) => {
-    setTestLoading(true);
-    try {
-      await apiClient.deleteTestById(testId, ''); // Set current admin userId if available
-      toast({ title: 'Test deleted!' });
-      if (id) apiClient.getTestsByHospital(id).then(setTests);
-    } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    } finally {
-      setTestLoading(false);
-    }
-  };
-
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Update Hospital</h1>
+      <h1 className="text-2xl font-bold mb-4">Add Hospital</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Same fields as AddHospitalPage, prefilled */}
         <div>
           <label className="block mb-1">Name</label>
           <input name="name" value={form.name || ''} onChange={handleChange} className="w-full border rounded px-3 py-2" required />
@@ -200,33 +140,11 @@ const UpdateHospitalPage: React.FC = () => {
           </div>
         </fieldset>
         <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded" disabled={loading}>
-          {loading ? 'Updating...' : 'Update Hospital'}
+          {loading ? 'Adding...' : 'Add Hospital'}
         </button>
       </form>
-      {/* --- Test Management Section --- */}
-      <div className="mt-10">
-        <h2 className="text-xl font-semibold mb-2">Tests for this Hospital</h2>
-        <form onSubmit={handleAddTest} className="flex gap-2 mb-4">
-          <input name="name" value={testForm.name} onChange={handleTestFormChange} placeholder="Test Name" className="border rounded px-2 py-1" required />
-          <select name="types" multiple value={testForm.types} onChange={handleTestFormChange} className="border rounded px-2 py-1">
-            {Object.values(TEST_TYPE).map((type) => (
-              <option key={type} value={type}>{type}</option>
-            ))}
-          </select>
-          <input name="price" type="number" value={testForm.price} onChange={handleTestFormChange} placeholder="Price" className="border rounded px-2 py-1" required />
-          <button type="submit" className="bg-green-600 text-white px-4 py-1 rounded" disabled={testLoading}>Add</button>
-        </form>
-        <ul>
-          {tests.map((test) => (
-            <li key={test.id} className="flex items-center justify-between border-b py-2">
-              <span>{test.name} ({test.types.join(', ')}) - ${test.price}</span>
-              <button onClick={() => handleDeleteTest(test.id)} className="bg-red-500 text-white px-3 py-1 rounded" disabled={testLoading}>Delete</button>
-            </li>
-          ))}
-        </ul>
-      </div>
     </div>
   );
 };
 
-export default UpdateHospitalPage; 
+export default AddHospitalPage; 

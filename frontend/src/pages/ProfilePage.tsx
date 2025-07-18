@@ -14,6 +14,8 @@ import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader,
 import { deleteUser } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
+import { FEEDBACK_TARGET_TYPE, FeedbackResponse } from "@/types";
+import { Trash2 } from "lucide-react";
 
 const ProfilePage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
@@ -28,6 +30,9 @@ const ProfilePage: React.FC = () => {
   });
   const navigate = useNavigate();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [activities, setActivities] = useState<FeedbackResponse[]>([]);
+  const [activitiesLoading, setActivitiesLoading] = useState(false);
+  const [targetNames, setTargetNames] = useState<{ [key: number]: string }>({});
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -53,6 +58,38 @@ const ProfilePage: React.FC = () => {
     };
     fetchProfile();
   }, [auth.user, userId]);
+
+  useEffect(() => {
+    const fetchActivities = async () => {
+      if (!profile) return;
+      setActivitiesLoading(true);
+      try {
+        const feedbacks = await apiClient.getUserFeedbacks(profile.id);
+        setActivities(feedbacks);
+        // Fetch hospital/doctor names for each feedback
+        const names: { [key: number]: string } = {};
+        await Promise.all(feedbacks.map(async (fb) => {
+          if (fb.targetType === FEEDBACK_TARGET_TYPE.HOSPITAL) {
+            try {
+              const h = await apiClient.getHospitalById(fb.targetId.toString());
+              names[fb.id] = h.name;
+            } catch {}
+          } else if (fb.targetType === FEEDBACK_TARGET_TYPE.DOCTOR) {
+            try {
+              const d = await apiClient.getDoctorById(fb.targetId);
+              names[fb.id] = d.name;
+            } catch {}
+          }
+        }));
+        setTargetNames(names);
+      } catch (err) {
+        // ignore
+      } finally {
+        setActivitiesLoading(false);
+      }
+    };
+    fetchActivities();
+  }, [profile]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -110,6 +147,12 @@ const ProfilePage: React.FC = () => {
       setLoading(false);
       setShowDeleteDialog(false);
     }
+  };
+
+  const handleDeleteFeedback = async (feedbackId: number) => {
+    if (!auth.user) return;
+    await apiClient.deleteFeedbackById(feedbackId, auth.user.uid);
+    setActivities((prev) => prev.filter((f) => f.id !== feedbackId));
   };
 
   if (loading) return <div className="flex justify-center items-center h-64">Loading...</div>;
@@ -236,6 +279,58 @@ const ProfilePage: React.FC = () => {
             )}
           </CardFooter>
         </Card>
+      </div>
+      {/* Activities Section */}
+      <div className="flex flex-col items-center mt-10">
+        <h2 className="text-2xl font-bold mb-4 text-blue-900">Activities</h2>
+        {activitiesLoading ? (
+          <div className="text-gray-500">Loading activities...</div>
+        ) : activities.length === 0 ? (
+          <div className="text-gray-500">No feedbacks yet.</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
+            {activities.map((fb) => {
+              const initials = (profile.name || profile.email || "U").slice(0, 2).toUpperCase();
+              const dateStr = new Date(fb.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+              const showReadMore = fb.comment && fb.comment.length > 120;
+              const targetLabel = fb.targetType === FEEDBACK_TARGET_TYPE.HOSPITAL ? "Hospital" : "Doctor";
+              return (
+                <div key={fb.id} className="border-2 border-blue-200 rounded-lg shadow-lg bg-white p-5 space-y-2 relative">
+                  <div className="absolute top-2 right-2 text-gray-800 font-semibold text-sm md:text-base flex items-center gap-2">
+                    <span>{dateStr}</span>
+                    {auth.user.uid === profile.id && (
+                      <button className="ml-auto text-xs bg-red-50 text-red-500 px-2 py-1 rounded flex items-center gap-1 hover:bg-red-100" onClick={() => handleDeleteFeedback(fb.id)}>
+                        <Trash2 size={20} />
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex items-center space-x-4 mb-1">
+                    <div className="h-12 w-12 flex items-center justify-center bg-blue-500 text-white text-lg font-semibold rounded-full">
+                      {initials}
+                    </div>
+                    <div>
+                      <div className="text-gray-900 font-medium leading-tight">
+                        {profile.name || profile.email}
+                      </div>
+                      <div className="text-xs text-black shadow-inner p-1 rounded-lg bg-blue-100 mt-[5px]">{targetLabel}: {targetNames[fb.id] || fb.targetId}</div>
+                    </div>
+                  </div>
+                  <div className="flex text-yellow-500 text-2xl mb-1">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <span key={i}>{i < fb.rating ? '★' : '☆'}</span>
+                    ))}
+                  </div>
+                  <p className="text-gray-700 leading-snug text-base">
+                    {showReadMore ? fb.comment.slice(0, 120) + '...' : fb.comment}
+                  </p>
+                  {showReadMore && (
+                    <div className="text-blue-500 font-medium cursor-pointer hover:underline">Read more</div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </Layout>
   );

@@ -13,12 +13,14 @@ import RegisterForm from "./components/auth/RegisterForm";
 import VerifyOtpForm from "./components/auth/VerifyOtpForm";
 import LoginForm from "./components/auth/LoginForm";
 import NotFound from "./pages/NotFound";
-import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
-import AddDoctorPage from "./pages/admin/AddDoctorPage";
 import TestPage from "./pages/test";
 import ProfilePage from "@/pages/ProfilePage";
 import DoctorProfilePage from "@/pages/DoctorProfilePage";
-// import UpdateHospitalPage from "./pages/admin/UpdateHospitalPage";
+import AdminDashboardLayout from "./pages/admin/AdminDashboardLayout";
+import AddHospitalPage from "./pages/admin/AddHospitalPage";
+import UpdateHospitalPage from "./pages/admin/UpdateHospitalPage";
+import AddDoctorPage from "./pages/admin/AddDoctorPage";
+import UpdateDoctorPage from "./pages/admin/UpdateDoctorPage";
 
 const queryClient = new QueryClient();
 
@@ -40,12 +42,20 @@ const App = () => (
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/profile/:userId" element={<ProfilePage />} />
             <Route path="/doctor/:doctorId" element={<DoctorProfilePage />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="/admin/dashboard/:hospitalId" element={<AdminDashboardPage />} />
-            <Route path="/admin/dashboard/:hospitalId/add-doctor" element={<AddDoctorPage />} />
-            <Route path="/admin" element={<AdminDashboardPage />} />
             <Route path="/test" element={<TestPage />} />
-            {/* <Route path="/admin/update/hospital/:id" element={<UpdateHospitalPage />} /> */}
+            {/* Admin Dashboard Routes */}
+            <Route path="/admin" element={<AdminDashboardLayout />}>
+              <Route path="add-hospital" element={<AddHospitalPage />} />
+              <Route path="update-hospital">
+                <Route index element={<div>Select a hospital to update.</div>} />
+                <Route path=":id" element={<UpdateHospitalPage />} />
+              </Route>
+              <Route path="add-doctor" element={<AddDoctorPage />} />
+              <Route path="update-doctor">
+                <Route index element={<div>Select a doctor to update.</div>} />
+                <Route path=":id" element={<UpdateDoctorPage />} />
+              </Route>
+            </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

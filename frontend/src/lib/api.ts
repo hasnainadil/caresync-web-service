@@ -26,6 +26,7 @@ import {
   FeedbackCreateRequest,
   FeedbackUpdateRequest,
   FEEDBACK_TARGET_TYPE,
+  AdminRegistration,
 } from "@/types";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { API_BASE_URL, API_URLS } from "./api-urls";
@@ -65,7 +66,7 @@ class ApiClient {
     return response.data;
   }
 
-  async registerUser(data: UserRegistration) {
+  async registerUser(data: UserRegistration | AdminRegistration) {
     try {
       console.log("registerUser");
       console.log(data);
