@@ -229,12 +229,8 @@ class ApiClient {
         API_URLS.data_service.registerHospital,
         {
           ...data,
+          userId: "user-1",
           location: location,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
         }
       );
       return response.data;
@@ -251,11 +247,9 @@ class ApiClient {
       // console.log("endpoint", API_URLS.data_service.updateHospital);
       const response = await axios.put(
         API_URLS.data_service.updateHospital,
-        data,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          ...data,
+          userId: "user-1",
         }
       );
       return response.data;
@@ -268,11 +262,7 @@ class ApiClient {
 
   async deleteHospitalById(id: string, userId: string): Promise<void> {
     const token = await this.getToken();
-    await axios.delete(API_URLS.data_service.deleteHospitalById(id, userId), {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    await axios.delete(API_URLS.data_service.deleteHospitalById(id, userId));
   }
 
   async getHospitalsByZone(zoneId: number): Promise<Hospital[]> {

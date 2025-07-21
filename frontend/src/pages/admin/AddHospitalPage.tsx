@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { apiClient } from '@/lib/api';
 import { HOSPITAL_TYPE, COST_RANGE, HospitalRegistrationRequest, LOCATION_TYPE } from '@/types';
 import { toast } from '@/hooks/use-toast';
+import { auth } from '@/lib/firebase';
 
 const initialForm: Omit<HospitalRegistrationRequest, 'id'> = {
   name: '',
@@ -21,6 +22,7 @@ const initialForm: Omit<HospitalRegistrationRequest, 'id'> = {
   icus: null,
   latitude: null,
   longitude: null,
+  userId: "user-1"
 };
 
 const AddHospitalPage: React.FC = () => {

@@ -195,6 +195,7 @@ export interface HospitalRegistrationRequest {
   icus: number | null;
   latitude: number | null;
   longitude: number | null;
+  userId: string;
 }
 
 // Alias for SearchFilters to maintain compatibility
