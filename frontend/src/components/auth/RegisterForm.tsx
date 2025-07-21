@@ -239,7 +239,7 @@ const RegisterForm: React.FC = () => {
                   required
                 >
                   <option value={ROLE.DEFAULT}>User</option>
-                  <option value={ROLE.ADMIN}>Admin</option>
+                  {/* <option value={ROLE.ADMIN}>Admin</option> */}
                 </select>
               </div>
             </div>
