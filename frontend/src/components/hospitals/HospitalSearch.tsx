@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import Select from 'react-select';
 import { Card, CardContent } from '@/components/ui/card';
 import { Search } from 'lucide-react';
-import { HospitalSearchCriteria, HOSPITAL_TYPE, COST_RANGE } from '@/types';
+import { HospitalSearchCriteria, HOSPITAL_TYPE, COST_RANGE, TEST_TYPE } from '@/types';
 
 interface HospitalSearchProps {
   onSearch: (filters: HospitalSearchCriteria) => void;
@@ -44,6 +44,19 @@ const HospitalSearch: React.FC<HospitalSearchProps> = ({ onSearch, isLoading }) 
     { value: COST_RANGE.VERY_HIGH, label: 'Very High' },
   ];
 
+  const testOptions: OptionType[] = [
+    { value: TEST_TYPE.BLOOD, label: 'Blood Test' },
+    { value: TEST_TYPE.HEART, label: 'Heart Test' },
+    { value: TEST_TYPE.BRAIN, label: 'Brain Test' },
+    { value: TEST_TYPE.LUNG, label: 'Lung Test' },
+    { value: TEST_TYPE.EYE, label: 'Eye Test' },
+    { value: TEST_TYPE.BONE, label: 'Bone Test' },
+    { value: TEST_TYPE.SKIN, label: 'Skin Test' },
+    { value: TEST_TYPE.GENERAL, label: 'General Test' },
+    { value: TEST_TYPE.LIVER, label: 'Liver Test' },
+    { value: TEST_TYPE.KIDNEY, label: 'Kidney Test' },
+  ];
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSearch(filters);
@@ -72,19 +85,28 @@ const HospitalSearch: React.FC<HospitalSearchProps> = ({ onSearch, isLoading }) 
     });
   };
 
+  const handleTestChange = (selectedOption: OptionType | null) => {
+
+    setFilters({
+      ...filters,
+      test: selectedOption ? (selectedOption.value as TEST_TYPE) : undefined,
+    });
+  };
+
   // Convert current values to react-select format
   const selectedCostRangeOption = filters.costRange ? costRangeOptions.find(option => option.value === filters.costRange) : null;
   const selectedTypeOptions = filters.types ? filters.types.map(type => ({
     value: type,
     label: hospitalTypeOptions.find(option => option.value === type)?.label || type
   })) : [];
+  const selectedTestOption = filters.test ? testOptions.find(option => option.value === filters.test) : null;
 
   return (
     <Card className="mb-8 shadow-md rounded-2xl">
       <CardContent className="p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <Label htmlFor="zoneId">Zone ID</Label>
               <Input
                 id="zoneId"
@@ -96,7 +118,7 @@ const HospitalSearch: React.FC<HospitalSearchProps> = ({ onSearch, isLoading }) 
                 placeholder="Enter zone ID..."
                 disabled={isLoading}
               />
-            </div>
+            </div> */}
 
             <div className="space-y-2">
               <Label htmlFor="type">Hospital Type</Label>
@@ -122,6 +144,17 @@ const HospitalSearch: React.FC<HospitalSearchProps> = ({ onSearch, isLoading }) 
                 isClearable
               />
             </div>
+
+            {/* <div className="space-y-2">
+              <Label htmlFor="test">Test</Label>
+              <Select
+                options={testOptions}
+                value={selectedTestOption}
+                onChange={handleTestChange}
+                isDisabled={isLoading}
+                isClearable
+              />
+            </div> */}
           </div>
 
           <Button type="submit" className="w-full md:w-auto active:scale-95" disabled={isLoading}>

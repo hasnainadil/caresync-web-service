@@ -56,29 +56,29 @@ const HospitalsPage: React.FC = () => {
     setIsLoading(true);
     try {
       console.log("Searching with filters:", filters);
-      
+
       // Initialize arrays to store results from each endpoint
       let zoneHospitals: Hospital[] = [];
       let typeHospitals: Hospital[] = [];
       let costRangeHospitals: Hospital[] = [];
-      
+
       // Call endpoints based on applied filters
       const promises: Promise<Hospital[]>[] = [];
-      
+
       if (filters.zoneId) {
         promises.push(apiClient.getHospitalsByZone(filters.zoneId));
       }
-      
+
       if (filters.types && filters.types.length > 0) {
         // Call getHospitalsByType for each selected type
         const typePromises = filters.types.map(type => apiClient.getHospitalsByType(type));
         promises.push(...typePromises);
       }
-      
+
       if (filters.costRange) {
         promises.push(apiClient.getHospitalsByCostRange(filters.costRange));
       }
-      
+
       // If no filters are applied, get all hospitals
       if (promises.length === 0) {
         const allHospitals = await apiClient.getAllHospitals();
@@ -87,12 +87,13 @@ const HospitalsPage: React.FC = () => {
           title: "Search completed",
           description: `Found ${allHospitals.length} hospitals`,
         });
-        return;
+        if (!filters.test)
+          return;
       }
-      
+
       // Execute all API calls
       const results = await Promise.all(promises);
-      
+
       // Extract results based on which filters were applied
       let resultIndex = 0;
       if (filters.zoneId) {
@@ -107,29 +108,30 @@ const HospitalsPage: React.FC = () => {
       if (filters.costRange) {
         costRangeHospitals = results[resultIndex++];
       }
-      
+
       // Intersect the results to find hospitals that match ALL applied filters
       let finalHospitals: Hospital[] = [];
-      
+      finalHospitals = await apiClient.getAllHospitals();
+
       if (filters.zoneId && filters.types && filters.types.length > 0 && filters.costRange) {
         // All three filters applied
-        finalHospitals = zoneHospitals.filter(zoneHospital => 
+        finalHospitals = zoneHospitals.filter(zoneHospital =>
           typeHospitals.some(typeHospital => typeHospital.id === zoneHospital.id) &&
           costRangeHospitals.some(costHospital => costHospital.id === zoneHospital.id)
         );
       } else if (filters.zoneId && filters.types && filters.types.length > 0) {
         // Zone and type filters
-        finalHospitals = zoneHospitals.filter(zoneHospital => 
+        finalHospitals = zoneHospitals.filter(zoneHospital =>
           typeHospitals.some(typeHospital => typeHospital.id === zoneHospital.id)
         );
       } else if (filters.zoneId && filters.costRange) {
         // Zone and cost range filters
-        finalHospitals = zoneHospitals.filter(zoneHospital => 
+        finalHospitals = zoneHospitals.filter(zoneHospital =>
           costRangeHospitals.some(costHospital => costHospital.id === zoneHospital.id)
         );
       } else if (filters.types && filters.types.length > 0 && filters.costRange) {
         // Type and cost range filters
-        finalHospitals = typeHospitals.filter(typeHospital => 
+        finalHospitals = typeHospitals.filter(typeHospital =>
           costRangeHospitals.some(costHospital => costHospital.id === typeHospital.id)
         );
       } else if (filters.zoneId) {
@@ -142,7 +144,25 @@ const HospitalsPage: React.FC = () => {
         // Only cost range filter
         finalHospitals = costRangeHospitals;
       }
-      
+
+      if (filters.test) {
+        const testResults = await apiClient.getTestsByType(filters.test);
+        let testHospitals: Hospital[] = [];
+        for (const test of testResults) {
+          if (test.hospitalResponse) {
+            testHospitals.push(test.hospitalResponse);
+          }
+        }
+        console.log("testResults", testResults);
+        let newFinalHospitals: Hospital[] = [];
+        for (const hospital of finalHospitals) {
+          if (testHospitals.some(testHospital => testHospital.id === hospital.id)) {
+            newFinalHospitals.push(hospital);
+          }
+        }
+        finalHospitals = newFinalHospitals;
+      }
+
       setHospitals(finalHospitals);
       toast({
         title: "Search completed",

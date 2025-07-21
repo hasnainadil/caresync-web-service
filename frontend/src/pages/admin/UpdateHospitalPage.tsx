@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { apiClient } from '@/lib/api';
 import { HOSPITAL_TYPE, COST_RANGE, HospitalRegistrationRequest, LOCATION_TYPE, TestResponse, TEST_TYPE } from '@/types';
 import { toast } from '@/hooks/use-toast';
+import Select from 'react-select';
 
 const initialForm: Omit<HospitalRegistrationRequest, 'id'> = {
   name: '',
@@ -22,6 +23,7 @@ const initialForm: Omit<HospitalRegistrationRequest, 'id'> = {
   icus: null,
   latitude: null,
   longitude: null,
+  userId: "user-1"
 };
 
 const UpdateHospitalPage: React.FC = () => {
@@ -35,7 +37,7 @@ const UpdateHospitalPage: React.FC = () => {
   useEffect(() => {
     if (id) {
       apiClient.getHospitalById(id).then((data) => {
-        setForm({ ...data, location: data.locationResponse || initialForm.location, website: data.website || '' });
+        setForm({ ...data, location: data.locationResponse || initialForm.location, website: data.website || '', userId: "user-1" });
       });
       apiClient.getTestsByHospital(id).then(setTests);
     }
@@ -141,11 +143,14 @@ const UpdateHospitalPage: React.FC = () => {
         </div>
         <div>
           <label className="block mb-1">Types</label>
-          <select name="types" multiple value={form.types} onChange={handleChange} className="w-full border rounded px-3 py-2">
-            {Object.values(HOSPITAL_TYPE).map((type) => (
-              <option key={type} value={type}>{type}</option>
-            ))}
-          </select>
+          <Select
+            name="types"
+            options={Object.values(HOSPITAL_TYPE).map((type) => ({ value: type, label: type }))}
+            isMulti
+            value={form.types.map((type) => ({ value: type, label: type }))}
+            onChange={(selectedOptions) => setForm({ ...form, types: selectedOptions.map((option) => option.value) })}
+            className="w-full border rounded px-3 py-2"
+          />
         </div>
         <div>
           <label className="block mb-1">ICUs</label>
@@ -170,7 +175,7 @@ const UpdateHospitalPage: React.FC = () => {
             <input name="longitude" type="number" value={form.longitude ?? ''} onChange={handleChange} className="w-full border rounded px-3 py-2" />
           </div>
         </div>
-        <fieldset className="border p-4 rounded">
+        {/* <fieldset className="border p-4 rounded">
           <legend className="font-semibold">Location</legend>
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -198,7 +203,7 @@ const UpdateHospitalPage: React.FC = () => {
               <input name="location.zoneId" type="number" value={form.location.zoneId ?? ''} onChange={handleChange} className="w-full border rounded px-3 py-2" required />
             </div>
           </div>
-        </fieldset>
+        </fieldset> */}
         <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded" disabled={loading}>
           {loading ? 'Updating...' : 'Update Hospital'}
         </button>
@@ -208,11 +213,14 @@ const UpdateHospitalPage: React.FC = () => {
         <h2 className="text-xl font-semibold mb-2">Tests for this Hospital</h2>
         <form onSubmit={handleAddTest} className="flex gap-2 mb-4">
           <input name="name" value={testForm.name} onChange={handleTestFormChange} placeholder="Test Name" className="border rounded px-2 py-1" required />
-          <select name="types" multiple value={testForm.types} onChange={handleTestFormChange} className="border rounded px-2 py-1">
-            {Object.values(TEST_TYPE).map((type) => (
-              <option key={type} value={type}>{type}</option>
-            ))}
-          </select>
+          <Select
+            name="types"
+            options={Object.values(TEST_TYPE).map((type) => ({ value: type, label: type }))}
+            isMulti={false}
+            value={testForm.types.map((type) => ({ value: type, label: type }))}
+            onChange={(selectedOption) => setTestForm({ ...testForm, types: [selectedOption?.value as TEST_TYPE] })}
+            className="w-full border rounded px-3 py-2"
+          />
           <input name="price" type="number" value={testForm.price} onChange={handleTestFormChange} placeholder="Price" className="border rounded px-2 py-1" required />
           <button type="submit" className="bg-green-600 text-white px-4 py-1 rounded" disabled={testLoading}>Add</button>
         </form>

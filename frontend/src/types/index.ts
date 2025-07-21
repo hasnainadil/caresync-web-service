@@ -69,6 +69,7 @@ export interface HospitalSearchCriteria {
   costRange?: COST_RANGE;
   zoneId?: number;
   types?: HOSPITAL_TYPE[];
+  test?: TEST_TYPE;
 }
 
 
@@ -195,6 +196,7 @@ export interface HospitalRegistrationRequest {
   icus: number | null;
   latitude: number | null;
   longitude: number | null;
+  userId: string;
 }
 
 // Alias for SearchFilters to maintain compatibility
@@ -219,9 +221,9 @@ export interface HospitalResponse {
   name: string;
   phoneNumber: string;
   website?: string;
-  types: string[];
+  types: HOSPITAL_TYPE[];
   icus: number;
-  costRange: string;
+  costRange: COST_RANGE;
   latitude: number;
   longitude: number;
   locationResponse: LocationResponse;
