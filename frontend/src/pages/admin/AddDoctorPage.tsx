@@ -3,6 +3,10 @@ import { apiClient } from '@/lib/api';
 import { DoctorRegistrationRequest, LOCATION_TYPE } from '@/types';
 import { toast } from '@/hooks/use-toast';
 
+const daysOfWeek = [
+  "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
+];
+
 const initialForm: DoctorRegistrationRequest = {
   name: '',
   specialties: [],
@@ -24,7 +28,46 @@ const initialForm: DoctorRegistrationRequest = {
 const AddDoctorPage: React.FC = () => {
   const [form, setForm] = useState(initialForm);
   const [loading, setLoading] = useState(false);
-  const [hospitalInput, setHospitalInput] = useState({ hospitalId: '', appointmentFee: '', weeklySchedules: '', appointmentTimes: '' });
+  const [hospitalInput, setHospitalInput] = useState({
+    hospitalId: '',
+    appointmentFee: '',
+    weeklySchedules: [] as string[],
+    appointmentTimes: [''] as string[],
+  });
+  const [showHospitals, setShowHospitals] = useState(false);
+  const [hospitals, setHospitals] = useState<{ id: number; name: string }[]>([]);
+
+  // Fetch all hospitals when needed
+  const fetchHospitals = async () => {
+    const data = await apiClient.getAllHospitals();
+    setHospitals(data.map((h: any) => ({ id: h.id, name: h.name })));
+    setShowHospitals(true);
+  };
+
+  // Handle weeklySchedules (checkboxes)
+  const handleScheduleChange = (day: string) => {
+    setHospitalInput((prev) => ({
+      ...prev,
+      weeklySchedules: prev.weeklySchedules.includes(day)
+        ? prev.weeklySchedules.filter(d => d !== day)
+        : [...prev.weeklySchedules, day]
+    }));
+  };
+
+  // Handle appointmentTimes (add/remove)
+  const handleTimeChange = (idx: number, value: string) => {
+    const updated = [...hospitalInput.appointmentTimes];
+    updated[idx] = value;
+    setHospitalInput({ ...hospitalInput, appointmentTimes: updated });
+  };
+  const addTime = () => setHospitalInput({
+    ...hospitalInput,
+    appointmentTimes: [...hospitalInput.appointmentTimes, '']
+  });
+  const removeTime = (idx: number) => setHospitalInput({
+    ...hospitalInput,
+    appointmentTimes: hospitalInput.appointmentTimes.filter((_, i) => i !== idx)
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -55,19 +98,23 @@ const AddDoctorPage: React.FC = () => {
         {
           hospitalId: Number(hospitalInput.hospitalId),
           appointmentFee: hospitalInput.appointmentFee ? Number(hospitalInput.appointmentFee) : undefined,
-          weeklySchedules: hospitalInput.weeklySchedules ? hospitalInput.weeklySchedules.split(',').map((s) => s.trim()) : undefined,
-          appointmentTimes: hospitalInput.appointmentTimes ? hospitalInput.appointmentTimes.split(',').map((s) => s.trim()) : undefined,
+          weeklySchedules: hospitalInput.weeklySchedules,
+          appointmentTimes: hospitalInput.appointmentTimes.filter(Boolean),
         },
       ],
     });
-    setHospitalInput({ hospitalId: '', appointmentFee: '', weeklySchedules: '', appointmentTimes: '' });
+    setHospitalInput({ hospitalId: '', appointmentFee: '', weeklySchedules: [], appointmentTimes: [''] });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await apiClient.registerDoctor(form);
+      await apiClient.registerDoctor({
+        ...form,
+        doctorHospitals: null,
+        userId: "user-1",
+      });
       toast({ title: 'Doctor added successfully!' });
       setForm(initialForm);
     } catch (error: any) {
@@ -136,10 +183,49 @@ const AddDoctorPage: React.FC = () => {
           <div className="grid grid-cols-4 gap-2 mb-2">
             <input name="hospitalId" value={hospitalInput.hospitalId} onChange={handleHospitalInputChange} placeholder="Hospital ID" className="border rounded px-2 py-1" />
             <input name="appointmentFee" value={hospitalInput.appointmentFee} onChange={handleHospitalInputChange} placeholder="Fee" className="border rounded px-2 py-1" />
-            <input name="weeklySchedules" value={hospitalInput.weeklySchedules} onChange={handleHospitalInputChange} placeholder="Schedules (comma)" className="border rounded px-2 py-1" />
-            <input name="appointmentTimes" value={hospitalInput.appointmentTimes} onChange={handleHospitalInputChange} placeholder="Times (comma)" className="border rounded px-2 py-1" />
+            <div>
+              <label className="block font-semibold mb-1">Schedules</label>
+              <div className="flex flex-wrap gap-1">
+                {daysOfWeek.map(day => (
+                  <label key={day} className="flex items-center gap-1">
+                    <input
+                      type="checkbox"
+                      checked={hospitalInput.weeklySchedules.includes(day)}
+                      onChange={() => handleScheduleChange(day)}
+                    />
+                    <span>{day}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="block font-semibold mb-1">Appointment Times</label>
+              {hospitalInput.appointmentTimes.map((time, idx) => (
+                <div key={idx} className="flex items-center gap-1 mb-1">
+                  <input
+                    type="time"
+                    value={time}
+                    onChange={e => handleTimeChange(idx, e.target.value)}
+                    className="border rounded px-2 py-1"
+                  />
+                  <button type="button" onClick={() => removeTime(idx)} className="text-red-500">Remove</button>
+                </div>
+              ))}
+              <button type="button" onClick={addTime} className="text-blue-500 mt-1">Add Time</button>
+            </div>
           </div>
           <button type="button" onClick={handleAddHospital} className="bg-green-600 text-white px-4 py-1 rounded mb-2">Add Hospital</button>
+          <button type="button" onClick={fetchHospitals} className="ml-2 bg-blue-500 text-white px-4 py-1 rounded mb-2">Show All Hospitals</button>
+          {showHospitals && (
+            <div className="mt-2 p-2 border rounded bg-gray-50 max-h-48 overflow-y-auto">
+              <h4 className="font-semibold mb-1">All Hospitals</h4>
+              <ul>
+                {hospitals.map(h => (
+                  <li key={h.id} className="text-sm">{h.id}: {h.name}</li>
+                ))}
+              </ul>
+            </div>
+          )}
           <ul>
             {form.doctorHospitals?.map((dh, idx) => (
               <li key={idx} className="text-sm">Hospital ID: {dh.hospitalId}, Fee: {dh.appointmentFee}, Schedules: {dh.weeklySchedules?.join(', ')}, Times: {dh.appointmentTimes?.join(', ')}</li>

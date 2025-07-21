@@ -21,6 +21,8 @@ import AddHospitalPage from "./pages/admin/AddHospitalPage";
 import UpdateHospitalPage from "./pages/admin/UpdateHospitalPage";
 import AddDoctorPage from "./pages/admin/AddDoctorPage";
 import UpdateDoctorPage from "./pages/admin/UpdateDoctorPage";
+import UpdateHospitalList from "./pages/admin/UpdateHospitalList";
+import UpdateDoctorList from "./pages/admin/UpdateDoctorList";
 
 const queryClient = new QueryClient();
 
@@ -47,12 +49,12 @@ const App = () => (
             <Route path="/admin" element={<AdminDashboardLayout />}>
               <Route path="add-hospital" element={<AddHospitalPage />} />
               <Route path="update-hospital">
-                <Route index element={<div>Select a hospital to update.</div>} />
+                <Route index element={<UpdateHospitalList />} />
                 <Route path=":id" element={<UpdateHospitalPage />} />
               </Route>
               <Route path="add-doctor" element={<AddDoctorPage />} />
               <Route path="update-doctor">
-                <Route index element={<div>Select a doctor to update.</div>} />
+                <Route index element={<UpdateDoctorList />} />
                 <Route path=":id" element={<UpdateDoctorPage />} />
               </Route>
             </Route>

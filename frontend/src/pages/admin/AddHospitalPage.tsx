@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { apiClient } from '@/lib/api';
 import { HOSPITAL_TYPE, COST_RANGE, HospitalRegistrationRequest, LOCATION_TYPE } from '@/types';
 import { toast } from '@/hooks/use-toast';
-import { auth } from '@/lib/firebase';
+import Select from 'react-select';
 
 const initialForm: Omit<HospitalRegistrationRequest, 'id'> = {
   name: '',
@@ -83,11 +83,14 @@ const AddHospitalPage: React.FC = () => {
         </div>
         <div>
           <label className="block mb-1">Types</label>
-          <select name="types" multiple value={form.types} onChange={handleChange} className="w-full border rounded px-3 py-2">
-            {Object.values(HOSPITAL_TYPE).map((type) => (
-              <option key={type} value={type}>{type}</option>
-            ))}
-          </select>
+          <Select
+            name="types"
+            options={Object.values(HOSPITAL_TYPE).map((type) => ({ value: type, label: type }))}
+            isMulti
+            value={form.types.map((type) => ({ value: type, label: type }))}
+            onChange={(selectedOptions) => setForm({ ...form, types: selectedOptions.map((option) => option.value) })}
+            className="w-full border rounded px-3 py-2"
+          />
         </div>
         <div>
           <label className="block mb-1">ICUs</label>

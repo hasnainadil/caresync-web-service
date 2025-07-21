@@ -18,6 +18,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import RatingForm from '@/components/ratings/RatingForm';
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogTitle, AlertDialogHeader, AlertDialogTrigger, AlertDialogFooter, AlertDialogAction } from '@/components/ui/alert-dialog';
 
+interface UserReview extends FeedbackResponse {
+  username?: string;
+}
 
 const HospitalDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -30,7 +33,7 @@ const HospitalDetailsPage: React.FC = () => {
   const [testSortOrder, setTestSortOrder] = useState<'asc' | 'desc'>('asc');
   const [doctorSpecialtyFilter, setDoctorSpecialtyFilter] = useState<string>('all');
   const [doctorSortOrder, setDoctorSortOrder] = useState<'asc' | 'desc'>('asc');
-  const [reviews, setReviews] = useState<FeedbackResponse[]>([]);
+  const [reviews, setReviews] = useState<UserReview[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState<boolean>(false);
 
   const { user, isAuthenticated } = useAuth();
@@ -44,6 +47,7 @@ const HospitalDetailsPage: React.FC = () => {
     }
     // eslint-disable-next-line
   }, [id]);
+
 
   const loadHospitalData = async () => {
     if (!id) return;
@@ -95,7 +99,12 @@ const HospitalDetailsPage: React.FC = () => {
     setReviewsLoading(true);
     try {
       const feedbacks = await apiClient.getHospitalFeedbacks(id);
-      setReviews(feedbacks);
+      const tempReviews: UserReview[] = [...feedbacks];
+      for (let review of tempReviews) {
+        const userData = await apiClient.getUserById(review.userId);
+        review.username = userData.name;
+      }
+      setReviews(tempReviews);
     } catch (error) {
       toast({
         title: "Error",
@@ -429,7 +438,7 @@ const HospitalDetailsPage: React.FC = () => {
                         <div className="flex items-center justify-between">
                           <div className="font-bold text-xl text-blue-900">{test.name}</div>
                           <div className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full font-semibold text-sm shadow-inner">
-                            ${test.price.toFixed(2)}
+                            Tk. {test.price.toFixed(2)}
                           </div>
                         </div>
                         <div className="flex flex-wrap gap-2 mt-1">
@@ -464,13 +473,13 @@ const HospitalDetailsPage: React.FC = () => {
                       (() => {
                         // Find if user has already reviewed
                         const userReview = reviews.find(r => r.userId === user.uid);
-                        if (!userReview) {
-                          return (
-                            <div className="mb-6">
-                              <RatingForm hospitalId={hospital.id} onRatingAdded={loadReviews} />
-                            </div>
-                          );
-                        }
+                        // if (!userReview) {
+                        //   return (
+                        //     <div className="mb-6">
+                        //       <RatingForm hospitalId={hospital.id} onRatingAdded={loadReviews} />
+                        //     </div>
+                        //   );
+                        // }
                         return null;
                       })()
                     )}
@@ -523,11 +532,11 @@ const HospitalDetailsPage: React.FC = () => {
                                   </div>
                                   <div>
                                     <div className="text-gray-900 font-medium leading-tight">
-                                      {userReview.userId ? 
-                                      <Link to={'/profile'} className='text-blue-500 font-medium cursor-pointer hover:underline'>{userReview.userId}</Link>
-                                      :
-                                      <span>User</span>
-                                    }
+                                      {userReview.username ?
+                                        <Link to={'/profile'} className='text-blue-500 font-medium cursor-pointer hover:underline'>{userReview.username}</Link>
+                                        :
+                                        <span>User</span>
+                                      }
                                     </div>
                                   </div>
                                   <div className="ml-auto w-full">
@@ -578,10 +587,10 @@ const HospitalDetailsPage: React.FC = () => {
                                 </div>
                                 <div>
                                   <div className="text-gray-900 font-medium leading-tight">
-                                    {review.userId ? 
-                                    <Link to={`/profile/${review.userId}`} className='text-blue-500 font-medium cursor-pointer hover:underline'>{review.userId}</Link>
-                                    :
-                                    <span>User</span>
+                                    {review.username ?
+                                      <Link to={`/profile/${review.userId}`} className='text-blue-500 font-medium cursor-pointer hover:underline'>{review.username}</Link>
+                                      :
+                                      <span>User</span>
                                     }
                                   </div>
                                 </div>
