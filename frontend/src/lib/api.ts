@@ -268,23 +268,14 @@ class ApiClient {
 
   async deleteHospitalById(id: string, userId: string): Promise<void> {
     const token = await this.getToken();
-    await axios.delete(API_URLS.data_service.deleteHospitalById(id, userId), {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    await axios.delete(API_URLS.data_service.deleteHospitalById(id, userId));
   }
 
   async getHospitalsByZone(zoneId: number): Promise<Hospital[]> {
     try {
       const token = await this.getToken();
       const response = await axios.get(
-        API_URLS.data_service.getHospitalsByZone(zoneId),
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        API_URLS.data_service.getHospitalsByZone(zoneId)
       );
       return response.data;
     } catch (error) {
@@ -298,12 +289,7 @@ class ApiClient {
     try {
       const token = await this.getToken();
       const response = await axios.get(
-        API_URLS.data_service.getHospitalsByType(type),
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        API_URLS.data_service.getHospitalsByType(type)
       );
       return response.data;
     } catch (error) {
@@ -453,41 +439,41 @@ class ApiClient {
 
   async getTestsByType(type: TEST_TYPE): Promise<TestResponse[]> {
     const token = await this.getToken();
-    const response = await axios.get(API_URLS.data_service.getTestsByType(type), {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await axios.get(
+      API_URLS.data_service.getTestsByType(type),
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
     return response.data;
   }
 
-  async getTestsByHospital(hospitalId: string | number): Promise<TestResponse[]> {
+  async getTestsByHospital(
+    hospitalId: string | number
+  ): Promise<TestResponse[]> {
     const token = await this.getToken();
-    const response = await axios.get(API_URLS.data_service.getTestsByHospital(hospitalId), {
-      // headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await axios.get(
+      API_URLS.data_service.getTestsByHospital(hospitalId),
+      {
+        // headers: { Authorization: `Bearer ${token}` },
+      }
+    );
     return response.data;
   }
 
   async addTest(data: TestAddRequest): Promise<TestResponse> {
     const token = await this.getToken();
-    const response = await axios.post(
-      API_URLS.data_service.addTest,
-      data,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
+    const response = await axios.post(API_URLS.data_service.addTest, data, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     return response.data;
   }
 
   async updateTest(data: TestUpdateRequest): Promise<TestResponse> {
     const token = await this.getToken();
-    const response = await axios.put(
-      API_URLS.data_service.updateTest,
-      data,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
+    const response = await axios.put(API_URLS.data_service.updateTest, data, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     return response.data;
   }
 
@@ -513,10 +499,13 @@ class ApiClient {
   // --- Doctor Endpoints ---
   async doctorServiceHealthCheck(): Promise<string> {
     const token = await this.getToken();
-    const response = await axios.get(API_URLS.data_service.doctorServiceHealthCheck, {
-      headers: { Authorization: `Bearer ${token}` },
-      responseType: 'text',
-    });
+    const response = await axios.get(
+      API_URLS.data_service.doctorServiceHealthCheck,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: "text",
+      }
+    );
     return response.data;
   }
 
@@ -536,23 +525,35 @@ class ApiClient {
     return response.data;
   }
 
-  async getDoctorsByHospital(hospitalId: string | number): Promise<DoctorResponse[]> {
+  async getDoctorsByHospital(
+    hospitalId: string | number
+  ): Promise<DoctorResponse[]> {
     const token = await this.getToken();
-    const response = await axios.get(API_URLS.data_service.getDoctorsByHospital(hospitalId), {
-      // headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await axios.get(
+      API_URLS.data_service.getDoctorsByHospital(hospitalId),
+      {
+        // headers: { Authorization: `Bearer ${token}` },
+      }
+    );
     return response.data;
   }
 
-  async getHospitalsByDoctor(doctorId: string | number): Promise<HospitalResponse[]> {
+  async getHospitalsByDoctor(
+    doctorId: string | number
+  ): Promise<HospitalResponse[]> {
     const token = await this.getToken();
-    const response = await axios.get(API_URLS.data_service.getHospitalsByDoctor(doctorId), {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await axios.get(
+      API_URLS.data_service.getHospitalsByDoctor(doctorId),
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
     return response.data;
   }
 
-  async registerDoctor(data: DoctorRegistrationRequest): Promise<DoctorResponse> {
+  async registerDoctor(
+    data: DoctorRegistrationRequest
+  ): Promise<DoctorResponse> {
     const token = await this.getToken();
     const response = await axios.post(
       API_URLS.data_service.registerDoctor,
@@ -566,13 +567,9 @@ class ApiClient {
 
   async updateDoctor(data: DoctorUpdateRequest): Promise<DoctorResponse> {
     const token = await this.getToken();
-    const response = await axios.put(
-      API_URLS.data_service.updateDoctor,
-      data,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
+    const response = await axios.put(API_URLS.data_service.updateDoctor, data, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     return response.data;
   }
 
@@ -584,28 +581,41 @@ class ApiClient {
   }
 
   // --- Feedback Endpoints ---
-  async getDoctorFeedbacks(doctorId: string | number): Promise<FeedbackResponse[]> {
+  async getDoctorFeedbacks(
+    doctorId: string | number
+  ): Promise<FeedbackResponse[]> {
     const token = await this.getToken();
-    const response = await axios.get(API_URLS.feedback_service.getDoctorFeedbacks(doctorId), {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await axios.get(
+      API_URLS.feedback_service.getDoctorFeedbacks(doctorId),
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
     return response.data;
   }
 
-  async getHospitalFeedbacks(hospitalId: string | number): Promise<FeedbackResponse[]> {
+  async getHospitalFeedbacks(
+    hospitalId: string | number
+  ): Promise<FeedbackResponse[]> {
     const token = await this.getToken();
-    const response = await axios.get(API_URLS.feedback_service.getHospitalFeedbacks(hospitalId), {
-      // headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await axios.get(
+      API_URLS.feedback_service.getHospitalFeedbacks(hospitalId),
+      {
+        // headers: { Authorization: `Bearer ${token}` },
+      }
+    );
     console.log("response", response.data);
     return response.data;
   }
 
   async getUserFeedbacks(userId: string): Promise<FeedbackResponse[]> {
     const token = await this.getToken();
-    const response = await axios.get(API_URLS.feedback_service.getUserFeedbacks(userId), {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await axios.get(
+      API_URLS.feedback_service.getUserFeedbacks(userId),
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
     return response.data;
   }
 
@@ -621,7 +631,10 @@ class ApiClient {
     return response.data;
   }
 
-  async updateFeedback(id: string | number, data: FeedbackUpdateRequest): Promise<FeedbackResponse> {
+  async updateFeedback(
+    id: string | number,
+    data: FeedbackUpdateRequest
+  ): Promise<FeedbackResponse> {
     const token = await this.getToken();
     const response = await axios.put(
       API_URLS.feedback_service.updateFeedback(id),
@@ -633,19 +646,28 @@ class ApiClient {
     return response.data;
   }
 
-  async deleteFeedbackById(feedbackId: string | number, userId: string): Promise<void> {
+  async deleteFeedbackById(
+    feedbackId: string | number,
+    userId: string
+  ): Promise<void> {
     const token = await this.getToken();
-    await axios.delete(API_URLS.feedback_service.deleteFeedbackById(feedbackId, userId), {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    await axios.delete(
+      API_URLS.feedback_service.deleteFeedbackById(feedbackId, userId),
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
   }
 
   // --- User/Admin Endpoints ---
   async verifyAdmin(userId: string): Promise<string> {
     const token = await this.getToken();
-    const response = await axios.get(API_URLS.auth_service.verifyAdmin(userId), {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await axios.get(
+      API_URLS.auth_service.verifyAdmin(userId),
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
     return response.data;
   }
 }
