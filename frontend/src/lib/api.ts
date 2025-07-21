@@ -245,14 +245,11 @@ class ApiClient {
     try {
       const token = await this.getToken();
       // console.log("endpoint", API_URLS.data_service.updateHospital);
-      const response = await axios.put(
-        API_URLS.data_service.updateHospital,
-        {
-          ...data,
-          location: null,
-          userId: "user-1",
-        }
-      );
+      const response = await axios.put(API_URLS.data_service.updateHospital, {
+        ...data,
+        location: null,
+        userId: "user-1",
+      });
       return response.data;
     } catch (error) {
       console.error("Error in updateHospital:");
@@ -270,12 +267,7 @@ class ApiClient {
     try {
       const token = await this.getToken();
       const response = await axios.get(
-        API_URLS.data_service.getHospitalsByZone(zoneId),
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        API_URLS.data_service.getHospitalsByZone(zoneId)
       );
       return response.data;
     } catch (error) {
@@ -289,12 +281,7 @@ class ApiClient {
     try {
       const token = await this.getToken();
       const response = await axios.get(
-        API_URLS.data_service.getHospitalsByType(type),
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        API_URLS.data_service.getHospitalsByType(type)
       );
       return response.data;
     } catch (error) {
@@ -325,36 +312,39 @@ class ApiClient {
 
   async getAllLocations(): Promise<LocationResponse[]> {
     const token = await this.getToken();
-    const response = await axios.get(
-      API_URLS.location_service.getAllLocations);
+    const response = await axios.get(API_URLS.location_service.getAllLocations);
     return response.data;
   }
 
   async getAllHospitalLocations(): Promise<LocationResponse[]> {
     const token = await this.getToken();
     const response = await axios.get(
-      API_URLS.location_service.getAllHospitalLocations);
+      API_URLS.location_service.getAllHospitalLocations
+    );
     return response.data;
   }
 
   async getAllUserLocations(): Promise<LocationResponse[]> {
     const token = await this.getToken();
     const response = await axios.get(
-      API_URLS.location_service.getAllUserLocations);
+      API_URLS.location_service.getAllUserLocations
+    );
     return response.data;
   }
 
   async getAllDoctorLocations(): Promise<LocationResponse[]> {
     const token = await this.getToken();
     const response = await axios.get(
-      API_URLS.location_service.getAllDoctorLocations);
+      API_URLS.location_service.getAllDoctorLocations
+    );
     return response.data;
   }
 
   async getLocationById(id: string): Promise<LocationResponse> {
     const token = await this.getToken();
     const response = await axios.get(
-      API_URLS.location_service.getLocationById(id));
+      API_URLS.location_service.getLocationById(id)
+    );
     return response.data;
   }
 
@@ -362,7 +352,8 @@ class ApiClient {
     const token = await this.getToken();
     const response = await axios.post(
       API_URLS.location_service.saveNewLocation,
-      location);
+      location
+    );
     return response.data;
   }
 
@@ -370,7 +361,8 @@ class ApiClient {
     const token = await this.getToken();
     const response = await axios.put(
       API_URLS.location_service.updateLocation,
-      location);
+      location
+    );
     return response.data;
   }
 
@@ -394,37 +386,40 @@ class ApiClient {
 
   async getTestsByType(type: TEST_TYPE): Promise<TestResponse[]> {
     const token = await this.getToken();
-    const response = await axios.get(API_URLS.data_service.getTestsByType(type));
+    const response = await axios.get(
+      API_URLS.data_service.getTestsByType(type)
+    );
     return response.data;
   }
 
-  async getTestsByHospital(hospitalId: string | number): Promise<TestResponse[]> {
+  async getTestsByHospital(
+    hospitalId: string | number
+  ): Promise<TestResponse[]> {
     const token = await this.getToken();
-    const response = await axios.get(API_URLS.data_service.getTestsByHospital(hospitalId), {
-      // headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await axios.get(
+      API_URLS.data_service.getTestsByHospital(hospitalId),
+      {
+        // headers: { Authorization: `Bearer ${token}` },
+      }
+    );
     return response.data;
   }
 
   async addTest(data: TestAddRequest): Promise<TestResponse> {
     const token = await this.getToken();
-    const response = await axios.post(
-      API_URLS.data_service.addTest,
-      {
-        ...data,
-        userId: "user-1",
-      });
+    const response = await axios.post(API_URLS.data_service.addTest, {
+      ...data,
+      userId: "user-1",
+    });
     return response.data;
   }
 
   async updateTest(data: TestUpdateRequest): Promise<TestResponse> {
     const token = await this.getToken();
-    const response = await axios.put(
-      API_URLS.data_service.updateTest,
-      {
-        ...data,
-        userId: "user-1",
-      });
+    const response = await axios.put(API_URLS.data_service.updateTest, {
+      ...data,
+      userId: "user-1",
+    });
     return response.data;
   }
 
@@ -437,14 +432,17 @@ class ApiClient {
     const token = await this.getToken();
     const response = await axios.post(
       API_URLS.data_service.searchTests,
-      criteria);
+      criteria
+    );
     return response.data;
   }
 
   // --- Doctor Endpoints ---
   async doctorServiceHealthCheck(): Promise<string> {
     const token = await this.getToken();
-    const response = await axios.get(API_URLS.data_service.doctorServiceHealthCheck);
+    const response = await axios.get(
+      API_URLS.data_service.doctorServiceHealthCheck
+    );
     return response.data;
   }
 
@@ -460,32 +458,42 @@ class ApiClient {
     return response.data;
   }
 
-  async getDoctorsByHospital(hospitalId: string | number): Promise<DoctorResponse[]> {
+  async getDoctorsByHospital(
+    hospitalId: string | number
+  ): Promise<DoctorResponse[]> {
     const token = await this.getToken();
-    const response = await axios.get(API_URLS.data_service.getDoctorsByHospital(hospitalId), {
-      // headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await axios.get(
+      API_URLS.data_service.getDoctorsByHospital(hospitalId),
+      {
+        // headers: { Authorization: `Bearer ${token}` },
+      }
+    );
     return response.data;
   }
 
-  async getHospitalsByDoctor(doctorId: string | number): Promise<HospitalResponse[]> {
+  async getHospitalsByDoctor(
+    doctorId: string | number
+  ): Promise<HospitalResponse[]> {
     const token = await this.getToken();
-    const response = await axios.get(API_URLS.data_service.getHospitalsByDoctor(doctorId), {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await axios.get(
+      API_URLS.data_service.getHospitalsByDoctor(doctorId),
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
     return response.data;
   }
 
-  async registerDoctor(data: DoctorRegistrationRequest): Promise<DoctorResponse> {
+  async registerDoctor(
+    data: DoctorRegistrationRequest
+  ): Promise<DoctorResponse> {
     try {
       const token = await this.getToken();
       console.log("data in registerDoctor", data);
-      const response = await axios.post(
-        API_URLS.data_service.registerDoctor,
-        {
-          ...data,
-          userId: "user-1",
-        });
+      const response = await axios.post(API_URLS.data_service.registerDoctor, {
+        ...data,
+        userId: "user-1",
+      });
       return response.data;
     } catch (error) {
       console.error("Error in registerDoctor:");
@@ -498,14 +506,12 @@ class ApiClient {
     try {
       const token = await this.getToken();
       console.log("data", data);
-      const response = await axios.put(
-        API_URLS.data_service.updateDoctor,
-        {
-          ...data,
-          id: data.id,
-          userId: "user-1",
-          location: null
-        });
+      const response = await axios.put(API_URLS.data_service.updateDoctor, {
+        ...data,
+        id: data.id,
+        userId: "user-1",
+        location: null,
+      });
       return response.data;
     } catch (error) {
       console.error("Error in updateDoctor:");
@@ -520,28 +526,41 @@ class ApiClient {
   }
 
   // --- Feedback Endpoints ---
-  async getDoctorFeedbacks(doctorId: string | number): Promise<FeedbackResponse[]> {
+  async getDoctorFeedbacks(
+    doctorId: string | number
+  ): Promise<FeedbackResponse[]> {
     const token = await this.getToken();
-    const response = await axios.get(API_URLS.feedback_service.getDoctorFeedbacks(doctorId), {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await axios.get(
+      API_URLS.feedback_service.getDoctorFeedbacks(doctorId),
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
     return response.data;
   }
 
-  async getHospitalFeedbacks(hospitalId: string | number): Promise<FeedbackResponse[]> {
+  async getHospitalFeedbacks(
+    hospitalId: string | number
+  ): Promise<FeedbackResponse[]> {
     const token = await this.getToken();
-    const response = await axios.get(API_URLS.feedback_service.getHospitalFeedbacks(hospitalId), {
-      // headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await axios.get(
+      API_URLS.feedback_service.getHospitalFeedbacks(hospitalId),
+      {
+        // headers: { Authorization: `Bearer ${token}` },
+      }
+    );
     console.log("response", response.data);
     return response.data;
   }
 
   async getUserFeedbacks(userId: string): Promise<FeedbackResponse[]> {
     const token = await this.getToken();
-    const response = await axios.get(API_URLS.feedback_service.getUserFeedbacks(userId), {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await axios.get(
+      API_URLS.feedback_service.getUserFeedbacks(userId),
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
     return response.data;
   }
 
@@ -557,7 +576,10 @@ class ApiClient {
     return response.data;
   }
 
-  async updateFeedback(id: string | number, data: FeedbackUpdateRequest): Promise<FeedbackResponse> {
+  async updateFeedback(
+    id: string | number,
+    data: FeedbackUpdateRequest
+  ): Promise<FeedbackResponse> {
     const token = await this.getToken();
     const response = await axios.put(
       API_URLS.feedback_service.updateFeedback(id),
@@ -569,19 +591,28 @@ class ApiClient {
     return response.data;
   }
 
-  async deleteFeedbackById(feedbackId: string | number, userId: string): Promise<void> {
+  async deleteFeedbackById(
+    feedbackId: string | number,
+    userId: string
+  ): Promise<void> {
     const token = await this.getToken();
-    await axios.delete(API_URLS.feedback_service.deleteFeedbackById(feedbackId, userId), {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    await axios.delete(
+      API_URLS.feedback_service.deleteFeedbackById(feedbackId, userId),
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
   }
 
   // --- User/Admin Endpoints ---
   async verifyAdmin(userId: string): Promise<string> {
     const token = await this.getToken();
-    const response = await axios.get(API_URLS.auth_service.verifyAdmin(userId), {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await axios.get(
+      API_URLS.auth_service.verifyAdmin(userId),
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
     return response.data;
   }
 }
