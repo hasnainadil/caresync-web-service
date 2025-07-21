@@ -1,18 +1,18 @@
 import { Search } from "lucide-react";
 
-const API_BASE_URL = {
-  "location-service": "http://localhost:8083",
-  "auth-service": "http://localhost:8081",
-  "data-service": "http://localhost:8082",
-  "feedback-service": "http://localhost:8084",
-};
-
 // const API_BASE_URL = {
-//   "location-service": "https://services.caresync.district12.xyz/location",
-//   "auth-service": "https://services.caresync.district12.xyz/auth",
-//   "data-service": "https://services.caresync.district12.xyz/data",
-//   "feedback-service": "https://services.caresync.district12.xyz/feedback",
+//   "location-service": "http://localhost:8083",
+//   "auth-service": "http://localhost:8081",
+//   "data-service": "http://localhost:8082",
+//   "feedback-service": "http://localhost:8084",
 // };
+
+const API_BASE_URL = {
+  "location-service": "https://services.caresync.district12.xyz/location",
+  "auth-service": "https://services.caresync.district12.xyz/auth",
+  "data-service": "https://services.caresync.district12.xyz/data",
+  "feedback-service": "https://services.caresync.district12.xyz/feedback",
+};
 
 // const API_BASE_URL = {
 //   "location-service": "http://location-service:8083",
