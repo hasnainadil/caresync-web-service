@@ -94,7 +94,7 @@ class ApiClient {
     }
   }
 
-  async userLoggedIn(userId: string) {
+  async userLoggedIn(userId: string): Promise<UserResponse> {
     console.log("userId", userId);
     try {
       const token = await this.getToken();

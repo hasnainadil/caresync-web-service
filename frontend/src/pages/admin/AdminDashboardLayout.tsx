@@ -1,4 +1,7 @@
-import React from 'react';
+import { apiClient } from '@/lib/api';
+import { auth } from '@/lib/firebase';
+import { ROLE } from '@/types';
+import React, { useEffect } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 
 const navItems = [
@@ -10,6 +13,25 @@ const navItems = [
 
 const AdminDashboardLayout: React.FC = () => {
   const location = useLocation();
+  const [isChecked, setIsChecked] = React.useState(false);
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const userResponse = await apiClient.getUserById(auth.currentUser?.uid || '');
+      if (!userResponse || userResponse.role !== ROLE.ADMIN) {
+        window.location.href = '/';
+      }
+      else {
+        setIsChecked(true);
+      }
+    };
+    checkAdmin();
+  }, []);
+
+  if (!isChecked) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
+
   return (
     <div className="flex min-h-screen">
       <aside className="w-64 bg-gray-100 p-6 border-r">

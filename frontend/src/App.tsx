@@ -24,6 +24,7 @@ import AddDoctorPage from "./pages/admin/AddDoctorPage";
 import UpdateDoctorPage from "./pages/admin/UpdateDoctorPage";
 import UpdateHospitalList from "./pages/admin/UpdateHospitalList";
 import UpdateDoctorList from "./pages/admin/UpdateDoctorList";
+import RegisterFormAdmin from "./components/auth/RegisterAdmin";
 
 const queryClient = new QueryClient();
 
@@ -41,7 +42,7 @@ const App = () => (
             <Route path="/doctors" element={<DoctorsPage />} />
             <Route path="/appointments" element={<AppointmentsPage />} />
             <Route path="/register" element={<RegisterForm />} />
-            <Route path="/verify-otp" element={<VerifyOtpForm />} />
+            {/* <Route path="/register/admin" element={<RegisterFormAdmin />} /> */}
             <Route path="/login" element={<LoginForm />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/profile/:userId" element={<ProfilePage />} />

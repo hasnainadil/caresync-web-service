@@ -13,6 +13,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { apiClient } from "@/lib/api";
+import { ROLE } from "@/types";
 
 const LoginForm: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -35,7 +36,14 @@ const LoginForm: React.FC = () => {
           title: "Login successful!",
           description: "Welcome back to CareSync.",
         });
-        navigate("/hospitals");
+        console.log("response");
+        console.log(response);
+        if (response.role === ROLE.ADMIN) {
+          navigate("/admin");
+        }
+        else {
+          navigate("/hospitals");
+        }
       } else {
         console.log("result", result);
         console.log("result.error", result.error);

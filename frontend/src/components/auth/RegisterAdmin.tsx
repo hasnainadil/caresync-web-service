@@ -12,7 +12,7 @@ import { MoveLeft } from 'lucide-react';
 import { deleteUser } from 'firebase/auth';
 import { LOCATION_TYPE, ROLE } from '@/types';
 
-const RegisterForm: React.FC = () => {
+const RegisterFormAdmin: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -23,7 +23,7 @@ const RegisterForm: React.FC = () => {
     city: '',
     postalCode: '',
     zoneId: '',
-    role: ROLE.DEFAULT,
+    role: ROLE.ADMIN,
   });
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -54,7 +54,7 @@ const RegisterForm: React.FC = () => {
               po: formData.po,
               city: formData.city,
               postalCode: parseInt(formData.postalCode),
-              zoneId: parseInt(formData.postalCode),
+              zoneId: parseInt(formData.zoneId),
             },
           });
           toast({
@@ -217,7 +217,7 @@ const RegisterForm: React.FC = () => {
                 />
               </div>
 
-              {/* <div className="space-y-2">
+              <div className="space-y-2">
                 <Label htmlFor="zoneId">Zone ID</Label>
                 <Input
                   id="zoneId"
@@ -227,7 +227,7 @@ const RegisterForm: React.FC = () => {
                   value={formData.zoneId}
                   onChange={handleChange}
                 />
-              </div> */}
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="role">Register as</Label>
                 <select
@@ -238,8 +238,8 @@ const RegisterForm: React.FC = () => {
                   className="w-full border rounded px-3 py-2"
                   required
                 >
-                  <option value={ROLE.DEFAULT}>User</option>
-                  {/* <option value={ROLE.ADMIN}>Admin</option> */}
+                  {/* <option value={ROLE.DEFAULT}>User</option> */}
+                  <option value={ROLE.ADMIN}>Admin</option>
                 </select>
               </div>
             </div>
@@ -259,4 +259,4 @@ const RegisterForm: React.FC = () => {
   );
 };
 
-export default RegisterForm;
+export default RegisterFormAdmin;
