@@ -27,6 +27,8 @@ import {
   FeedbackUpdateRequest,
   FEEDBACK_TARGET_TYPE,
   AdminRegistration,
+  ChatRequest,
+  HospitalChatBotMessage,
 } from "@/types";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { API_BASE_URL, API_URLS } from "./api-urls";
@@ -184,31 +186,31 @@ class ApiClient {
     return response.data;
   }
 
-  async searchHospitalsByCriteria(
-    criteria: HospitalSearchCriteria
-  ): Promise<HospitalListItem[]> {
-    try {
-      const token = await this.getToken();
-      const response = await axios.get(
-        API_URLS.data_service.searchHospitalsByCriteria,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          params: {
-            costRange: criteria.costRange,
-            zoneId: criteria.zoneId,
-            types: criteria.types,
-          },
-        }
-      );
-      return response.data;
-    } catch (error) {
-      console.error("Error in searchHospitalsByCriteria:");
-      console.error(error);
-      throw error;
-    }
-  }
+  // async searchHospitalsByCriteria(
+  //   criteria: HospitalSearchCriteria
+  // ): Promise<HospitalListItem[]> {
+  //   try {
+  //     const token = await this.getToken();
+  //     const response = await axios.get(
+  //       API_URLS.data_service.searchHospitalsByCriteria,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //         params: {
+  //           costRange: criteria.costRange,
+  //           zoneId: criteria.zoneId,
+  //           types: criteria.types,
+  //         },
+  //       }
+  //     );
+  //     return response.data;
+  //   } catch (error) {
+  //     console.error("Error in searchHospitalsByCriteria:");
+  //     console.error(error);
+  //     throw error;
+  //   }
+  // }
 
   async registerHospital(data: HospitalRegistrationRequest): Promise<Hospital> {
     try {
@@ -614,6 +616,24 @@ class ApiClient {
       }
     );
     return response.data;
+  }
+
+  async sendBotMessage(chatRequest: ChatRequest): Promise<HospitalChatBotMessage> {
+    try {
+      const token = await this.getToken();
+      const response = await axios.post(
+        API_URLS.chat_service.sendMessage,
+        chatRequest,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error in sendBotMessage:");
+      console.error(error);
+      throw error;
+    }
   }
 }
 

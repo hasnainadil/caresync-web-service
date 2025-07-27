@@ -12,6 +12,7 @@ const API_BASE_URL = {
   "auth-service": "https://services.caresync.district12.xyz/auth",
   "data-service": "https://services.caresync.district12.xyz/data",
   "feedback-service": "https://services.caresync.district12.xyz/feedback",
+  "chat-service": "http://localhost:8085", // Assuming chat service is running locally
 };
 
 // const API_BASE_URL = {
@@ -101,6 +102,9 @@ const API_URLS = {
     deleteFeedbackById: (feedbackId: string | number, userId: string) =>
       `${API_BASE_URL["feedback-service"]}/feedback/v1/${feedbackId}?userId=${userId}`,
   },
+  chat_service: {
+    sendMessage: `${API_BASE_URL["chat-service"]}/chat/v1/send`,
+  }
 };
 
 export { API_BASE_URL, API_URLS };

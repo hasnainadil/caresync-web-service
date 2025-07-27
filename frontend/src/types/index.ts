@@ -67,11 +67,29 @@ export interface Hospital {
 
 export interface HospitalSearchCriteria {
   costRange?: COST_RANGE;
-  zoneId?: number;
   types?: HOSPITAL_TYPE[];
-  test?: TEST_TYPE;
+  tests?: TEST_TYPE[];
 }
 
+export interface ChatRequest {
+  userId: string;
+  message: string;
+  role: ChatRoles;
+  createdAt: string;
+}
+
+export enum ChatRoles {
+  USER = "user",
+  ASSISTANT = "assistant",
+  SYSTEM = "system"
+}
+
+export interface HospitalChatBotMessage {
+  content: string;
+  id: string;
+  role: ChatRoles;
+  createdAt: string;
+}
 
 
 
@@ -101,7 +119,7 @@ export interface Appointment {
 }
 
 // Legacy interface for backward compatibility
-export interface HospitalFilter{
+export interface HospitalFilter {
   location?: string;
   type?: string;
   min_rating?: number;

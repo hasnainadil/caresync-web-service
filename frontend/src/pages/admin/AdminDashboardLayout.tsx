@@ -3,9 +3,9 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 
 const navItems = [
   { label: 'Add Hospital', path: '/admin/add-hospital' },
-  // { label: 'Update Hospital', path: '/admin/update-hospital' },
+  { label: 'Update Hospital', path: '/admin/update-hospital' },
   { label: 'Add Doctor', path: '/admin/add-doctor' },
-  // { label: 'Update Doctor', path: '/admin/update-doctor' },
+  { label: 'Update Doctor', path: '/admin/update-doctor' },
 ];
 
 const AdminDashboardLayout: React.FC = () => {

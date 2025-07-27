@@ -19,10 +19,14 @@ interface OptionType {
 
 const HospitalSearch: React.FC<HospitalSearchProps> = ({ onSearch, isLoading }) => {
   const [filters, setFilters] = useState<HospitalSearchCriteria>({
-    costRange: undefined,
-    zoneId: undefined,
-    types: undefined,
+    costRange: null,
+    types: [],
+    tests: [],
   });
+  const [selectedTestOptions, setSelectedTestOptions] = useState<OptionType[] | null>(null);
+  const [selectedTypeOptions, setSelectedTypeOptions] = useState<OptionType[]>([]);
+  const [selectedCostRangeOption, setSelectedCostRangeOption] = useState<OptionType | null>(null);
+
 
   // Options for react-select
   const hospitalTypeOptions: OptionType[] = [
@@ -63,63 +67,39 @@ const HospitalSearch: React.FC<HospitalSearchProps> = ({ onSearch, isLoading }) 
   };
 
   const handleCostRangeChange = (selectedOption: OptionType | null) => {
+    const costRange = selectedOption ? (selectedOption.value as COST_RANGE) : null;
     setFilters({
       ...filters,
-      costRange: selectedOption ? (selectedOption.value as COST_RANGE) : undefined,
+      costRange: costRange,
     });
+    setSelectedCostRangeOption(selectedOption);
   };
 
-  const handleZoneIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setFilters({
-      ...filters,
-      zoneId: value ? parseInt(value) : undefined,
-    });
-  };
 
   const handleTypeChange = (selectedOptions: OptionType[] | null) => {
-    const selectedValues = selectedOptions ? selectedOptions.map(option => option.value as HOSPITAL_TYPE) : [];
+    const types = selectedOptions ? selectedOptions.map(option => option.value as HOSPITAL_TYPE) : [];
     setFilters({
       ...filters,
-      types: selectedValues.length > 0 ? selectedValues : undefined,
+      types: types,
     });
+    setSelectedTypeOptions(selectedOptions || []);
   };
 
-  const handleTestChange = (selectedOption: OptionType | null) => {
-
+  const handleTestChange = (selectedOptions: OptionType[] | null) => {
+    const tests = selectedOptions ? selectedOptions.map(option => option.value as TEST_TYPE) : [];
     setFilters({
       ...filters,
-      test: selectedOption ? (selectedOption.value as TEST_TYPE) : undefined,
+      tests: tests,
     });
+    setSelectedTestOptions(selectedOptions || null);
   };
 
-  // Convert current values to react-select format
-  const selectedCostRangeOption = filters.costRange ? costRangeOptions.find(option => option.value === filters.costRange) : null;
-  const selectedTypeOptions = filters.types ? filters.types.map(type => ({
-    value: type,
-    label: hospitalTypeOptions.find(option => option.value === type)?.label || type
-  })) : [];
-  const selectedTestOption = filters.test ? testOptions.find(option => option.value === filters.test) : null;
 
   return (
     <Card className="mb-8 shadow-md rounded-2xl">
       <CardContent className="p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {/* <div className="space-y-2">
-              <Label htmlFor="zoneId">Zone ID</Label>
-              <Input
-                id="zoneId"
-                name="zoneId"
-                type="number"
-                min={1}
-                value={filters.zoneId ?? ""}
-                onChange={handleZoneIdChange}
-                placeholder="Enter zone ID..."
-                disabled={isLoading}
-              />
-            </div> */}
-
             <div className="space-y-2">
               <Label htmlFor="type">Hospital Type</Label>
               <Select
@@ -145,18 +125,18 @@ const HospitalSearch: React.FC<HospitalSearchProps> = ({ onSearch, isLoading }) 
               />
             </div>
 
-            {/* <div className="space-y-2">
+            <div className="space-y-2">
               <Label htmlFor="test">Test</Label>
               <Select
                 options={testOptions}
-                value={selectedTestOption}
+                value={selectedTestOptions}
                 onChange={handleTestChange}
                 isDisabled={isLoading}
                 isClearable
+                isMulti
               />
-            </div> */}
+            </div>
           </div>
-
           <Button type="submit" className="w-full md:w-auto active:scale-95" disabled={isLoading}>
             <Search className="mr-2 h-4 w-4" />
             {isLoading ? 'Searching...' : 'Search Hospitals'}

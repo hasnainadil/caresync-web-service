@@ -6,10 +6,11 @@ import HospitalMap from "@/components/hospitals/HospitalMap";
 import { Hospital, HospitalSearchCriteria } from "@/types";
 import { apiClient } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
-import { Grid, Map } from "lucide-react";
+import { Grid, Map, MessageCircle, MessageCircleIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import Loader from "@/components/ui/Loader";
+import HospitalChatBot from "@/components/hospitals/HospitalChatBot";
 
 
 enum ViewStyle {
@@ -24,6 +25,7 @@ const HospitalsPage: React.FC = () => {
   const [viewStyle, setViewStyle] = useState(ViewStyle.Grid);
   const PAGE_SIZE = 9;
   const [currentPage, setCurrentPage] = useState(1);
+  const [showChat, setShowChat] = useState(false);
 
   // Mock data for demonstration
   useEffect(() => {
@@ -54,130 +56,7 @@ const HospitalsPage: React.FC = () => {
 
   const handleSearch = async (filters: HospitalSearchCriteria) => {
     setIsLoading(true);
-    try {
-      console.log("Searching with filters:", filters);
-
-      // Initialize arrays to store results from each endpoint
-      let zoneHospitals: Hospital[] = [];
-      let typeHospitals: Hospital[] = [];
-      let costRangeHospitals: Hospital[] = [];
-
-      // Call endpoints based on applied filters
-      const promises: Promise<Hospital[]>[] = [];
-
-      if (filters.zoneId) {
-        promises.push(apiClient.getHospitalsByZone(filters.zoneId));
-      }
-
-      if (filters.types && filters.types.length > 0) {
-        // Call getHospitalsByType for each selected type
-        const typePromises = filters.types.map(type => apiClient.getHospitalsByType(type));
-        promises.push(...typePromises);
-      }
-
-      if (filters.costRange) {
-        promises.push(apiClient.getHospitalsByCostRange(filters.costRange));
-      }
-
-      // If no filters are applied, get all hospitals
-      if (promises.length === 0) {
-        const allHospitals = await apiClient.getAllHospitals();
-        setHospitals(allHospitals);
-        toast({
-          title: "Search completed",
-          description: `Found ${allHospitals.length} hospitals`,
-        });
-        if (!filters.test)
-          return;
-      }
-
-      // Execute all API calls
-      const results = await Promise.all(promises);
-
-      // Extract results based on which filters were applied
-      let resultIndex = 0;
-      if (filters.zoneId) {
-        zoneHospitals = results[resultIndex++];
-      }
-      if (filters.types && filters.types.length > 0) {
-        // Combine all type results (union of all selected types)
-        const allTypeResults = results.slice(resultIndex, resultIndex + filters.types.length);
-        typeHospitals = allTypeResults.flat();
-        resultIndex += filters.types.length;
-      }
-      if (filters.costRange) {
-        costRangeHospitals = results[resultIndex++];
-      }
-
-      // Intersect the results to find hospitals that match ALL applied filters
-      let finalHospitals: Hospital[] = [];
-      finalHospitals = await apiClient.getAllHospitals();
-
-      if (filters.zoneId && filters.types && filters.types.length > 0 && filters.costRange) {
-        // All three filters applied
-        finalHospitals = zoneHospitals.filter(zoneHospital =>
-          typeHospitals.some(typeHospital => typeHospital.id === zoneHospital.id) &&
-          costRangeHospitals.some(costHospital => costHospital.id === zoneHospital.id)
-        );
-      } else if (filters.zoneId && filters.types && filters.types.length > 0) {
-        // Zone and type filters
-        finalHospitals = zoneHospitals.filter(zoneHospital =>
-          typeHospitals.some(typeHospital => typeHospital.id === zoneHospital.id)
-        );
-      } else if (filters.zoneId && filters.costRange) {
-        // Zone and cost range filters
-        finalHospitals = zoneHospitals.filter(zoneHospital =>
-          costRangeHospitals.some(costHospital => costHospital.id === zoneHospital.id)
-        );
-      } else if (filters.types && filters.types.length > 0 && filters.costRange) {
-        // Type and cost range filters
-        finalHospitals = typeHospitals.filter(typeHospital =>
-          costRangeHospitals.some(costHospital => costHospital.id === typeHospital.id)
-        );
-      } else if (filters.zoneId) {
-        // Only zone filter
-        finalHospitals = zoneHospitals;
-      } else if (filters.types && filters.types.length > 0) {
-        // Only type filter
-        finalHospitals = typeHospitals;
-      } else if (filters.costRange) {
-        // Only cost range filter
-        finalHospitals = costRangeHospitals;
-      }
-
-      if (filters.test) {
-        const testResults = await apiClient.getTestsByType(filters.test);
-        let testHospitals: Hospital[] = [];
-        for (const test of testResults) {
-          if (test.hospitalResponse) {
-            testHospitals.push(test.hospitalResponse);
-          }
-        }
-        console.log("testResults", testResults);
-        let newFinalHospitals: Hospital[] = [];
-        for (const hospital of finalHospitals) {
-          if (testHospitals.some(testHospital => testHospital.id === hospital.id)) {
-            newFinalHospitals.push(hospital);
-          }
-        }
-        finalHospitals = newFinalHospitals;
-      }
-
-      setHospitals(finalHospitals);
-      toast({
-        title: "Search completed",
-        description: `Found ${finalHospitals.length} hospitals`,
-      });
-    } catch (error) {
-      console.error("Search error:", error);
-      toast({
-        title: "Search failed",
-        description: "Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    const { costRange, types, tests } = filters;
   };
 
   const totalPages = Math.ceil(hospitals.length / PAGE_SIZE);
@@ -185,6 +64,18 @@ const HospitalsPage: React.FC = () => {
 
   return (
     <Layout>
+      <div className=" fixed right-5 bottom-0 z-50 h-4/6 flex flex-col items-end justify-end mb-5">
+        {showChat ?
+          <HospitalChatBot onClose={() => setShowChat(false)} />
+          :
+          <button className="bg-blue-600 text-white p-[10px] rounded-full shadow-lg hover:bg-blue-700 transition-colors duration-200"
+            onClick={() => setShowChat(prev => !prev)}
+            aria-label="Chat with bot"
+          >
+            <MessageCircleIcon size={28} className="translate-x-[1px] -translate-y-[1px]" />
+          </button>
+        }
+      </div>
       <div className="space-y-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -228,7 +119,7 @@ const HospitalsPage: React.FC = () => {
                   sessionStorage.setItem(ViewStyle.MapViewStyle, ViewStyle.Grid);
                 }}
                 id="grid-view-button"
-                className="relative px-4 py-2 rounded-xl transition-colors duration-200 z-10 w-[120px]"
+                className="relative px-4 py-2 rounded-xl transition-colors duration-200 w-[120px]"
               >
                 <span className={cn(
                   "transition-colors duration-200",
@@ -245,7 +136,7 @@ const HospitalsPage: React.FC = () => {
                   setViewStyle(ViewStyle.Map);
                   sessionStorage.setItem(ViewStyle.MapViewStyle, ViewStyle.Map);
                 }}
-                className="relative px-4 py-2 rounded-xl transition-colors duration-200 z-10 w-[120px]"
+                className="relative px-4 py-2 rounded-xl transition-colors duration-200 w-[120px]"
               >
                 <span className={cn(
                   "transition-colors duration-200",

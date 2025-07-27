@@ -11,7 +11,6 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<{ user: User | null; error: string | null }>;
   signUp: (email: string, password: string) => Promise<{ user: User | null; error: string | null }>;
-  userInfo: UserResponse | null;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -21,7 +20,6 @@ const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   login: async () => ({ user: null, error: null }),
   signUp: async () => ({ user: null, error: null }),
-  userInfo: null,
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -40,13 +38,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return unsubscribe;
   }, []);
 
-  useEffect(() => {
-    if (auth.currentUser) {
-      apiClient.getUserById(auth.currentUser.uid).then((data) => {
-        setUserInfo(data);
-      });
-    }
-  }, [auth.currentUser]);
+  // useEffect(() => {
+  //   if (auth.currentUser) {
+  //     apiClient.getUserById(auth.currentUser.uid).then((data) => {
+  //       setUserInfo(data);
+  //     });
+  //   }
+  // }, [auth.currentUser]);
 
   const logout = async () => {
     await logOut();
@@ -67,7 +65,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     login,
     signUp,
     isAuthenticated: !!user,
-    userInfo,
   };
 
   return (

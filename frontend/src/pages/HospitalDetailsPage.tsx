@@ -11,12 +11,13 @@ import { TEST_TYPE, TestResponse, DoctorResponse } from '@/types';
 import { Hospital } from '@/types';
 import { apiClient } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
-import { MapPin, Phone, Globe, ExternalLink, Mail, Trash2 } from 'lucide-react';
+import { MapPin, Phone, Globe, ExternalLink, Mail, Trash2, Star, PencilIcon } from 'lucide-react';
 import HospitalMap from '@/components/hospitals/HospitalMap';
 import { FEEDBACK_TARGET_TYPE, FeedbackResponse } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import RatingForm from '@/components/ratings/RatingForm';
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogTitle, AlertDialogHeader, AlertDialogTrigger, AlertDialogFooter, AlertDialogAction } from '@/components/ui/alert-dialog';
+import { auth } from '@/lib/firebase';
 
 interface UserReview extends FeedbackResponse {
   username?: string;
@@ -35,6 +36,13 @@ const HospitalDetailsPage: React.FC = () => {
   const [doctorSortOrder, setDoctorSortOrder] = useState<'asc' | 'desc'>('asc');
   const [reviews, setReviews] = useState<UserReview[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState<boolean>(false);
+  const [reviewSortType, setReviewSortType] = useState<'date' | 'rating'>(null);
+  const [reviewsSortOrder, setReviewsSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [reviewSortMinRating, setReviewSortMinRating] = useState<number>(0);
+  const [filteredReviews, setFilteredReviews] = useState<UserReview[]>([]);
+  const [enableEditMode, setEnableEditMode] = useState<boolean>(false);
+  const [userRating, setUserRating] = useState<number>(0);
+  const [userReview, setUserReview] = useState<string>("");
 
   const { user, isAuthenticated } = useAuth();
 
@@ -47,6 +55,23 @@ const HospitalDetailsPage: React.FC = () => {
     }
     // eslint-disable-next-line
   }, [id]);
+
+  useEffect(() => {
+    setFilteredReviews(reviews);
+    if (reviews.length > 0) {
+      for (const review of reviews) {
+        if (review.userId == auth.currentUser.uid) {
+          setUserReview(review.comment);
+          setUserRating(review.rating);
+        }
+      }
+    }
+  }, [reviews])
+
+
+  useEffect(() => {
+    setFilteredReviews(reviews.filter((review) => review.rating >= reviewSortMinRating));
+  }, [reviewSortMinRating]);
 
 
   const loadHospitalData = async () => {
@@ -104,6 +129,7 @@ const HospitalDetailsPage: React.FC = () => {
         const userData = await apiClient.getUserById(review.userId);
         review.username = userData.name;
       }
+      console.log('Loaded reviews:', tempReviews);
       setReviews(tempReviews);
     } catch (error) {
       toast({
@@ -473,18 +499,90 @@ const HospitalDetailsPage: React.FC = () => {
                       (() => {
                         // Find if user has already reviewed
                         const userReview = reviews.find(r => r.userId === user.uid);
-                        // if (!userReview) {
-                        //   return (
-                        //     <div className="mb-6">
-                        //       <RatingForm hospitalId={hospital.id} onRatingAdded={loadReviews} />
-                        //     </div>
-                        //   );
-                        // }
+                        if (!userReview) {
+                          return (
+                            <div className="mb-6">
+                              <RatingForm hospitalId={hospital.id} onRatingAdded={loadReviews} />
+                            </div>
+                          );
+                        }
                         return null;
                       })()
                     )}
+                    {/* Filtering and sorting */}
+                    <div className='flex justify-between items-center mb-4'>
+                      <div className='text-base font-semibold text-gray-600'>Total Reviews: {reviews.length}</div>
+                      <div className='flex items-center gap-2'>
+                        {/* Sort Options */}
+                        <Select value="sort" onValueChange={(value) => {
+                          console.log(value);
+                          if (value === 'date') {
+                            console.log('Sorting by date');
+                            setReviews(reviews.slice().sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+                          } else if (value === 'rating') {
+                            console.log('Sorting by rating');
+                            setReviews(reviews.slice().sort((a, b) => a.rating - b.rating));
+                          }
+                        }}>
+                          <SelectTrigger className="w-32">
+                            {reviewSortType || "Sort Type"}
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="date">Date</SelectItem>
+                            <SelectItem value="rating">Rating</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Select value="sort" onValueChange={(value) => {
+                          console.log(value);
+                          if (value === 'asc') {
+                            console.log('Sorting in ascending order');
+                            setReviewsSortOrder('asc');
+                            setFilteredReviews(reviews.slice().sort((a, b) => a.rating - b.rating));
+                          } else if (value === 'desc') {
+                            console.log('Sorting in descending order');
+                            setReviewsSortOrder('desc');
+                            setFilteredReviews(reviews.slice().sort((a, b) => b.rating - a.rating));
+                          }
+                        }}>
+                          <SelectTrigger className="w-32">
+                            {reviewsSortOrder.toLocaleUpperCase() || "Sort Order"}
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="desc">Desc</SelectItem>
+                            <SelectItem value="asc">Asc</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    {/* Select min rating */}
+                    <div className="mb-4 flex flex-row">
+                      <label htmlFor="min-rating" className="text-sm font-medium text-gray-700">Min Rating</label>
+                      <div className="flex text-yellow-500 text-3xl mb-1  ml-2">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            type="button"
+                            onClick={() => {
+                              if (star === reviewSortMinRating) {
+                                setReviewSortMinRating(0);
+                              }
+                              else {
+                                setReviewSortMinRating(star);
+                              }
+                            }}
+                            className="focus:outline-none"
+                          >
+                            <Star
+                              className={`h-6 w-6 ${star <= reviewSortMinRating ? 'text-yellow-500 fill-current' : 'text-gray-500'
+                                }`}
+                            />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
                     {/* Reviews List */}
-                    {reviews.length === 0 ? (
+                    {filteredReviews.length === 0 ? (
                       <div className="text-gray-500">No reviews yet for this hospital.</div>
                     ) : (
                       <div className="flex flex-col md:grid md:grid-cols-2 gap-6">
@@ -493,7 +591,7 @@ const HospitalDetailsPage: React.FC = () => {
                           (() => {
                             const userReview = reviews.find(r => r.userId === user.uid);
                             if (!userReview) return null;
-                            const initials = (userReview.userId || 'U').slice(0, 2).toUpperCase();
+                            const initials = (userReview.username || 'U').slice(0, 2).toUpperCase();
                             const dateStr = new Date(userReview.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
                             const showReadMore = userReview.comment && userReview.comment.length > 120;
                             return (
@@ -501,9 +599,11 @@ const HospitalDetailsPage: React.FC = () => {
                                 key={userReview.id}
                                 className="w-full border-2 border-blue-400 rounded-lg shadow-lg bg-white p-5 space-y-2 relative md:col-span-2"
                               >
-                                {/* Date in top right, more visible */}
                                 <div className='absolute top-4 right-6 text-gray-800 font-semibold text-sm md:text-base flex items-center gap-3'>
                                   <span>{dateStr}</span>
+                                  {/* <button className='text-blue-500 font-medium cursor-pointer hover:underline p-2 rounded-lg bg-blue-50' onClick={() => setEnableEditMode(true)}>
+                                    <PencilIcon size={20} className=' text-blue-500' />
+                                  </button> */}
                                   <AlertDialog>
                                     <AlertDialogTrigger asChild>
                                       <button className='text-blue-500 font-medium cursor-pointer hover:underline p-2 rounded-lg bg-red-50'>
@@ -527,10 +627,10 @@ const HospitalDetailsPage: React.FC = () => {
                                   </AlertDialog>
                                 </div>
                                 <div className="flex items-center space-x-4 mb-1 w-full">
-                                  <div className="p-2 flex items-center justify-center bg-blue-500 text-white text-lg font-semibold rounded-full">
+                                  <div className="p-2 flex items-center justify-center bg-blue-500 text-white text-lg font-semibold rounded-full w-fit">
                                     {initials}
                                   </div>
-                                  <div>
+                                  <div className='flex-auto flex w-1/2'>
                                     <div className="text-gray-900 font-medium leading-tight">
                                       {userReview.username ?
                                         <Link to={'/profile'} className='text-blue-500 font-medium cursor-pointer hover:underline'>{userReview.username}</Link>
@@ -538,20 +638,6 @@ const HospitalDetailsPage: React.FC = () => {
                                         <span>User</span>
                                       }
                                     </div>
-                                  </div>
-                                  <div className="ml-auto w-full">
-                                    {/* <RatingForm
-                                      hospitalId={hospital.id}
-                                      onRatingAdded={loadReviews}
-                                      existingRating={{
-                                        id: userReview.id,
-                                        rating: userReview.rating,
-                                        review_text: userReview.comment,
-                                        user_id: userReview.userId,
-                                        user_name: userReview.userId, // or use a real name if available
-                                        created_at: userReview.createdAt,
-                                      }}
-                                    /> */}
                                   </div>
                                 </div>
                                 <div className="flex text-yellow-500 text-2xl mb-1">
@@ -570,8 +656,8 @@ const HospitalDetailsPage: React.FC = () => {
                           })()
                         )}
                         {/* Other reviews (excluding user's) */}
-                        {reviews.filter(r => !user || r.userId !== user.uid).map((review) => {
-                          const initials = (review.userId || 'U').slice(0, 2).toUpperCase();
+                        {filteredReviews.filter(r => !user || r.userId !== user.uid).map((review) => {
+                          const initials = (review.username || 'U').slice(0, 2).toUpperCase();
                           const dateStr = new Date(review.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
                           const showReadMore = review.comment && review.comment.length > 120;
                           return (
