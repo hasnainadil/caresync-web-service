@@ -3,7 +3,7 @@ import Layout from "@/components/Layout";
 import HospitalSearch from "@/components/hospitals/HospitalSearch";
 import HospitalCard from "@/components/hospitals/HospitalCard";
 import HospitalMap from "@/components/hospitals/HospitalMap";
-import { Hospital, HospitalSearchCriteria } from "@/types";
+import { Hospital, HospitalResponse, HospitalSearchCriteria } from "@/types";
 import { apiClient } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 import { Grid, Map, MessageCircle, MessageCircleIcon } from "lucide-react";
@@ -57,6 +57,44 @@ const HospitalsPage: React.FC = () => {
   const handleSearch = async (filters: HospitalSearchCriteria) => {
     setIsLoading(true);
     const { costRange, types, tests } = filters;
+    const allHospitals = await apiClient.getAllHospitals();
+    if (!allHospitals) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch hospitals. Please try again later.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+    const hospitalsForTests: HospitalResponse[] = []
+    if (tests && tests.length > 0) {
+      for (const test of tests) {
+        const testResponses = await apiClient.getTestsByType(test);
+        if (testResponses && testResponses.length > 0) {
+          for (const testResponse of testResponses) {
+            const hospitalResponses = testResponse.hospitalResponse;
+            hospitalsForTests.push(hospitalResponses);
+          }
+        }
+      }
+    }
+    const filteredHospitals = allHospitals.filter((hospital) => {
+      const matchesCostRange = !costRange || hospital.costRange === costRange;
+      const matchesTypes = !types || types.some(type => hospital.types.includes(type));
+      const matchesTests = !tests || hospitalsForTests.some(h => h.id === hospital.id);
+      return matchesCostRange && matchesTypes && matchesTests;
+    });
+    setHospitals(filteredHospitals as unknown as Hospital[]);
+    setIsLoading(false);
+    setCurrentPage(1); // Reset to first page after search
+    if (filteredHospitals.length === 0) {
+      toast({
+        title: "No Results",
+        description: "No hospitals found matching your criteria.",
+        variant: "destructive",
+      });
+    }
   };
 
   const totalPages = Math.ceil(hospitals.length / PAGE_SIZE);
