@@ -51,7 +51,7 @@ class ApiClient {
   }
 
   private async getToken(): Promise<string | null> {
-    const user = auth.currentUser;
+    const user = auth?.currentUser;
     if (user) {
       return await user.getIdToken();
     }

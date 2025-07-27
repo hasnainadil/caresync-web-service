@@ -60,7 +60,7 @@ const HospitalDetailsPage: React.FC = () => {
     setFilteredReviews(reviews);
     if (reviews.length > 0) {
       for (const review of reviews) {
-        if (review.userId == auth.currentUser.uid) {
+        if (review.userId == auth?.currentUser?.uid) {
           setUserReview(review.comment);
           setUserRating(review.rating);
         }
@@ -125,10 +125,19 @@ const HospitalDetailsPage: React.FC = () => {
     try {
       const feedbacks = await apiClient.getHospitalFeedbacks(id);
       const tempReviews: UserReview[] = [...feedbacks];
+      
+      // Load usernames for each review (handle errors gracefully)
       for (let review of tempReviews) {
-        const userData = await apiClient.getUserById(review.userId);
-        review.username = userData.name;
+        try {
+          const userData = await apiClient.getUserById(review.userId);
+          review.username = userData.name;
+        } catch (error) {
+          // If we can't get user data, just use a default name
+          console.warn(`Failed to load user data for review ${review.id}:`, error);
+          review.username = 'Anonymous User';
+        }
       }
+      
       console.log('Loaded reviews:', tempReviews);
       setReviews(tempReviews);
     } catch (error) {

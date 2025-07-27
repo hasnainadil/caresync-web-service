@@ -38,14 +38,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return unsubscribe;
   }, []);
 
-  // useEffect(() => {
-  //   if (auth.currentUser) {
-  //     apiClient.getUserById(auth.currentUser.uid).then((data) => {
-  //       setUserInfo(data);
-  //     });
-  //   }
-  // }, [auth.currentUser]);
-
   const logout = async () => {
     await logOut();
   };

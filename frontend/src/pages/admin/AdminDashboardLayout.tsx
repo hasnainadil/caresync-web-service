@@ -17,7 +17,7 @@ const AdminDashboardLayout: React.FC = () => {
 
   useEffect(() => {
     const checkAdmin = async () => {
-      const userResponse = await apiClient.getUserById(auth.currentUser?.uid || '');
+      const userResponse = await apiClient.getUserById(auth?.currentUser?.uid || '');
       if (!userResponse || userResponse.role !== ROLE.ADMIN) {
         window.location.href = '/';
       }
