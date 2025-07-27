@@ -16,6 +16,7 @@ import NotFound from "./pages/NotFound";
 import TestPage from "./pages/test";
 import ProfilePage from "@/pages/ProfilePage";
 import DoctorProfilePage from "@/pages/DoctorProfilePage";
+import DoctorsPage from "@/pages/DoctorsPage";
 import AdminDashboardLayout from "./pages/admin/AdminDashboardLayout";
 import AddHospitalPage from "./pages/admin/AddHospitalPage";
 import UpdateHospitalPage from "./pages/admin/UpdateHospitalPage";
@@ -37,6 +38,7 @@ const App = () => (
             <Route path="/" element={<Layout><HomePage /></Layout>} />
             <Route path="/hospitals" element={<HospitalsPage />} />
             <Route path="/hospitals/:id" element={<HospitalDetailsPage />} />
+            <Route path="/doctors" element={<DoctorsPage />} />
             <Route path="/appointments" element={<AppointmentsPage />} />
             <Route path="/register" element={<RegisterForm />} />
             <Route path="/verify-otp" element={<VerifyOtpForm />} />
