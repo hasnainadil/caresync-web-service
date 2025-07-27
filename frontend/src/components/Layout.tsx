@@ -2,7 +2,7 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { Hospital, User, Calendar } from "lucide-react";
+import { Hospital, User, Calendar, ExternalLinkIcon } from "lucide-react";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -40,14 +40,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               >
                 Find Doctors
               </Link>
-              {/* {isAuthenticated && (
-                <Link
-                  to="/appointments"
-                  className="text-gray-700 hover:text-blue-600 transition-colors"
-                >
-                  My Appointments
-                </Link>
-              )} */}
+              <Link
+                to="https://app.hhfn.org.bd/login"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-700 hover:text-blue-600 transition-colors"
+              >
+                Donate
+                <ExternalLinkIcon className="inline h-4 w-4 ml-1" />
+              </Link>
+              
             </nav>
 
             <div className="flex items-center space-x-4">
