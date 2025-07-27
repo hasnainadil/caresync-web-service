@@ -5,6 +5,7 @@ import { Search } from "lucide-react";
 //   "auth-service": "http://localhost:8081",
 //   "data-service": "http://localhost:8082",
 //   "feedback-service": "http://localhost:8084",
+//   "chat-service": "http://localhost:8085",
 // };
 
 const API_BASE_URL = {
@@ -12,7 +13,7 @@ const API_BASE_URL = {
   "auth-service": "https://services.caresync.district12.xyz/auth",
   "data-service": "https://services.caresync.district12.xyz/data",
   "feedback-service": "https://services.caresync.district12.xyz/feedback",
-  "chat-service": "http://localhost:8085", // Assuming chat service is running locally
+  "chat-service": "https://services.caresync.district12.xyz/chat",
 };
 
 // const API_BASE_URL = {
@@ -20,6 +21,7 @@ const API_BASE_URL = {
 //   "auth-service": "http://auth-service:8081",
 //   "data-service": "http://data-service:8082",
 //   "feedback-service": "http://feedback-service:8084",
+//   "chat-service": "http://chat-service:8085",
 // };
 
 const API_URLS = {
@@ -104,7 +106,7 @@ const API_URLS = {
   },
   chat_service: {
     sendMessage: `${API_BASE_URL["chat-service"]}/chat/v1/send`,
-  }
+  },
 };
 
 export { API_BASE_URL, API_URLS };
