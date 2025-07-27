@@ -79,12 +79,21 @@ const HospitalsPage: React.FC = () => {
         }
       }
     }
+    console.log("Filters:");
+    console.log(filters);
+    console.log("Cost Range:", costRange);
+    console.log("Types:", types);
+    console.log("Tests:", tests);
+    console.log("All Hospitals:");
+    console.log(allHospitals);
     const filteredHospitals = allHospitals.filter((hospital) => {
       const matchesCostRange = !costRange || hospital.costRange === costRange;
-      const matchesTypes = !types || types.some(type => hospital.types.includes(type));
-      const matchesTests = !tests || hospitalsForTests.some(h => h.id === hospital.id);
+      const matchesTypes = !types || types.length === 0 || types.some(type => hospital.types.includes(type));
+      const matchesTests = !tests || tests.length === 0 || hospitalsForTests.some(h => h.id === hospital.id);
       return matchesCostRange && matchesTypes && matchesTests;
     });
+    console.log("Filtered Hospitals:");
+    console.log(filteredHospitals);
     setHospitals(filteredHospitals as unknown as Hospital[]);
     setIsLoading(false);
     setCurrentPage(1); // Reset to first page after search
