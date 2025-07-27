@@ -41,7 +41,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 Find Doctors
               </Link>
               <Link
-                to="https://app.hhfn.org.bd/login"
+                to="https://hhfn.org.bd/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-700 hover:text-blue-600 transition-colors"
