@@ -127,7 +127,7 @@ const HospitalDetailsPage: React.FC = () => {
       const tempReviews: UserReview[] = [...feedbacks];
       
       // Load usernames for each review (handle errors gracefully)
-      for (let review of tempReviews) {
+      for (const review of tempReviews) {
         try {
           const userData = await apiClient.getUserById(review.userId);
           review.username = userData.name;
